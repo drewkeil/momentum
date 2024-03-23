@@ -66,15 +66,17 @@ void playerObject::collide(aabb& other){ // split this into 2 functions, collide
 }
 
 void playerObject::process_input(uint8_t input){
-	++velocity.y;
+	velocity.y+=0.5;
+	jumpBuffer-=std::min(jumpBuffer,1);
+	shiftBuffer-=std::min(shiftBuffer,1);
 	if(input&4)
-		velocity.x-=1;
+		velocity.x-=0.2;
 	if(input&8)
-		velocity.x+=1;
+		velocity.x+=0.2;
 	if((input&32))
 		jumpBuffer=5;
 	if(jumpBuffer&&(grounded||coyote)){
-		velocity.y-=15;
+		velocity.y-=6;
 		jumpBuffer=0;
 		coyote=0;
 	}
