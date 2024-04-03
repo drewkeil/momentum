@@ -6,7 +6,7 @@
 #include "gameObjects.h"
 #include "level.h"
 
-int main(){
+int main(int argc, char** argv){
 	sf::RenderWindow window(sf::VideoMode(640,360),"test");
 	window.setKeyRepeatEnabled(false);
 	sf::Clock clock;
@@ -22,7 +22,10 @@ int main(){
 	sf::Keyboard::Key jump=sf::Keyboard::Key::Space;
 	std::vector<aabb> toDraw;
 	std::ifstream fin;
-	fin.open("levels/lv1.txt");
+	if(argc>1)
+		fin.open(argv[1]);
+	else
+		fin.open("levels/lv1.txt");
 	if(!fin.is_open()){
 		std::cerr<<"failed to load level"<<std::endl;
 		return 1;

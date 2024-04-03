@@ -17,7 +17,9 @@ public:
 
 	void collide_player(playerObject& p);
 
-	bool level_finished();
+	bool level_finished(playerObject& p);
+
+	void print_level(std::ostream& os);
 
 private:
 	std::vector<aabb> platforms;

@@ -51,3 +51,17 @@ void level::ready_player(playerObject& p){
 	p.spawnPoint.y=spawn.y;
 	p.respawn();
 }
+
+bool level::level_finished(playerObject& p){
+	return (p.topLeft.x+p.size.x/2)>=goal;
+}
+
+void level::print_level(std::ostream& os){
+	os<<goal<<' '<<deathHeight<<'\n';
+	os<<spawn.x<<' '<<spawn.y<<'\n';
+	os<<platforms.size()<<' '<<spikes.size()<<'\n';
+	for(aabb& rect:platforms)
+		os<<rect.topLeft.x<<' '<<rect.topLeft.y<<' '<<rect.size.x<<' '<<rect.size.y<<'\n';
+	for(aabb& rect:spikes)
+		os<<rect.topLeft.x<<' '<<rect.topLeft.y<<'\n';
+}
