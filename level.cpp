@@ -10,20 +10,27 @@ void level::get_drawn(std::vector<aabb>& drawn){
 
 void level::load_level(std::istream& is){
 	int p,s;
+	is>>goal>>deathHeight;
 	is>>spawn.x>>spawn.y>>p>>s;
 	platforms.resize(p);
 	for(int i=0;i<p;++i){
 		aabb& pl=platforms[i];
 		is>>pl.topLeft.x>>pl.topLeft.y>>pl.size.x>>pl.size.y;
+		pl.color=sf::Color::Black;
 	}
 	spikes.resize(s);
 	for(int i=0;i<s;++i){
 		aabb& sp=spikes[i];
-		is>>sp.topLeft.x>>sp.topLeft.y>>sp.size.x>>sp.size.y;
+		is>>sp.topLeft.x>>sp.topLeft.y;
+		sp.size.x=5;
+		sp.size.y=5;
+		sp.color=sf::Color::Red;
 	}
 }
 
 void level::collide_player(playerObject& p){
+	if(p.topLeft.y>deathHeight)
+		p.respawn();
 	for(aabb spike:spikes){
 		if(spike.colliding(p)){
 			p.respawn();
@@ -36,6 +43,7 @@ void level::collide_player(playerObject& p){
 			p.collide(platform);
 		}
 	}
+	complete=p.topLeft.x+p.size.x/2>goal;
 }
 
 void level::ready_player(playerObject& p){

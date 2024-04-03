@@ -2,6 +2,7 @@
 #define GAMEOBJECTS_H
 
 #include <cstdint>
+#include <SFML/Graphics.hpp>
 
 struct vector2{
 	float x;
@@ -12,6 +13,7 @@ class aabb{
 public: 
 	vector2 topLeft;
 	vector2 size; // width, height
+	sf::Color color;
 
 	aabb();
 

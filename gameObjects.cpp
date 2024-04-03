@@ -9,7 +9,7 @@ aabb::aabb(float x, float y, float width, float height)
 
 aabb::aabb(){}
 
-bool aabb::colliding(aabb& other){ // this probably works i think
+bool aabb::colliding(aabb& other){
 	bool vert=!((topLeft.y>(other.topLeft.y+other.size.y))||((topLeft.y+size.y)<other.topLeft.y));
 	bool horz=!((topLeft.x>(other.topLeft.x+other.size.x))||((topLeft.x+size.x)<other.topLeft.x));
 	return horz&&vert;
@@ -18,8 +18,6 @@ bool aabb::colliding(aabb& other){ // this probably works i think
 
 void playerObject::collide(aabb& other){ // split this into 2 functions, collide_x and collide_y
 	float minX,minY;
-	//float prevx=abs(velocity.x);
-	//float prevy=abs(velocity.y);
 	minX=other.topLeft.x-(topLeft.x+size.x);
 	if(abs(minX)>abs((other.topLeft.x+other.size.x)-topLeft.x))
 		minX=(other.topLeft.x+other.size.x)-topLeft.x;
@@ -40,7 +38,6 @@ void playerObject::collide(aabb& other){ // split this into 2 functions, collide
 			}
 			velocity.x=0;
 		}
-		//topLeft.y-=(velocity.y/prevx)*abs(minX); // try this some other way i guess
 		topLeft.x+=minX;
 	}else{
 		if(minY<0&&velocity.y>0){
@@ -59,24 +56,22 @@ void playerObject::collide(aabb& other){ // split this into 2 functions, collide
 			}
 			velocity.y=0;
 		}
-		//topLeft.x-=(velocity.x/prevy)*abs(minY); // try this some other way
 		topLeft.y+=minY;
 	}
-	//std::cout<<"uncolided "<<minY<<' '<<velocity.y<<std::endl;
 }
 
 void playerObject::process_input(uint8_t input){
-	velocity.y+=0.5;
+	velocity.y+=0.3;
 	jumpBuffer-=std::min(jumpBuffer,1);
 	shiftBuffer-=std::min(shiftBuffer,1);
 	if(input&4)
-		velocity.x-=0.2;
+		velocity.x-=0.1/((abs(velocity.x)+2.5)/5);
 	if(input&8)
-		velocity.x+=0.2;
+		velocity.x+=0.1/((abs(velocity.x)+2.5)/5);
 	if((input&32))
 		jumpBuffer=5;
 	if(jumpBuffer&&(grounded||coyote)){
-		velocity.y-=6;
+		velocity.y-=5;
 		jumpBuffer=0;
 		coyote=0;
 	}
@@ -117,12 +112,11 @@ void playerObject::process_input(uint8_t input){
 		grounded=false;
 		velocity.x*=0.99f;
 		if(velocity.x>0&&!(input&8))
-			velocity.x-=std::min(velocity.x, 3.f);
+			velocity.x-=std::min(velocity.x, 0.5f);
 		else if(velocity.x<0&&!(input&4))
-			velocity.x-=std::max(velocity.x, -3.f);
+			velocity.x-=std::max(velocity.x, -0.5f);
 	}else
 		coyote-=std::min(coyote, 1);	
-	//std::cout<<velocity.y<<std::endl;
 }
 
 void playerObject::update(){ // split this into update_x and update_y
@@ -131,6 +125,8 @@ void playerObject::update(){ // split this into update_x and update_y
 }
 
 void playerObject::respawn(){
+	topLeft.x=spawnPoint.x;
+	topLeft.y=spawnPoint.y;
 	velocity.x=0;
 	velocity.y=0;
 	jumpBuffer=0;
@@ -140,6 +136,7 @@ void playerObject::respawn(){
 }
 
 playerObject::playerObject(){
-	size.x=20;
-	size.y=50;
+	size.x=10;
+	size.y=25;
+	color=sf::Color::Black;
 }

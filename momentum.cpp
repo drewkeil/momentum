@@ -8,6 +8,7 @@
 
 int main(){
 	sf::RenderWindow window(sf::VideoMode(640,360),"test");
+	window.setKeyRepeatEnabled(false);
 	sf::Clock clock;
 	float timer=0.f;
 	level cLevel;
@@ -50,8 +51,6 @@ int main(){
 					input^=event.key.code==down ? 2:0;
 					input^=event.key.code==left ? 4:0;
 					input^=event.key.code==right ? 8:0;
-					input^=event.key.code==shift ? 16:0;
-					input^=event.key.code==jump ? 32:0;
 					break;
 				default:
 					break;
@@ -61,24 +60,29 @@ int main(){
 		if(timer>=0.015625f){
 			timer=0;
 			player.process_input(input);
+			input&=207;
 			player.update();
 			cLevel.collide_player(player);
 		}
 		window.clear(sf::Color::White);
 		for(aabb rect:toDraw){
-			sf::RectangleShape shape(sf::Vector2f(rect.size.x, rect.size.y));
-			shape.setPosition(rect.topLeft.x, rect.topLeft.y);
-			shape.setFillColor(sf::Color::White);
-			shape.setOutlineColor(sf::Color::Black);
-			shape.setOutlineThickness(1.f);
-			window.draw(shape);
+			sf::Vertex verticies[5]= {
+				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), rect.color, sf::Vector2f(0.f, 0.f)),
+				sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y), rect.color, sf::Vector2f(0.f, 0.f)),
+				sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y+rect.size.y), rect.color, sf::Vector2f(0.f, 0.f)),
+				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y+rect.size.y), rect.color, sf::Vector2f(0.f, 0.f)),
+				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), rect.color, sf::Vector2f(0.f, 0.f))
+			};
+			window.draw(verticies, 5, sf::LineStrip);
 		}
-		sf::RectangleShape shape(sf::Vector2f(player.size.x, player.size.y));
-		shape.setPosition(player.topLeft.x, player.topLeft.y);
-		shape.setFillColor(sf::Color::White);
-		shape.setOutlineColor(sf::Color::Black);
-		shape.setOutlineThickness(1.f);
-		window.draw(shape);
+		sf::Vertex verticies[5]= {
+			sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f)),
+			sf::Vertex(sf::Vector2f(player.topLeft.x+player.size.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f)),
+			sf::Vertex(sf::Vector2f(player.topLeft.x+player.size.x, player.topLeft.y+player.size.y), player.color, sf::Vector2f(0.f, 0.f)),
+			sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y+player.size.y), player.color, sf::Vector2f(0.f, 0.f)),
+			sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f))
+		};
+		window.draw(verticies, 5, sf::LineStrip);
 		window.display();
 	}
 }

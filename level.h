@@ -17,10 +17,15 @@ public:
 
 	void collide_player(playerObject& p);
 
+	bool level_finished();
+
 private:
 	std::vector<aabb> platforms;
 	std::vector<aabb> spikes;
 	vector2 spawn;
+	float deathHeight;
+	float goal;
+	bool complete;
 };
 
 #endif
