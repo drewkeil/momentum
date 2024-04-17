@@ -2,7 +2,6 @@ CXX = x86_64-w64-mingw32-g++
 CXX ?= g++
 C++FLAGS ?= -Wall -Werror -pedantic -O2 -static -DSFML_STATIC
 LIBS = -L/usr/local/SFML/lib -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lwinmm -lgdi32 -lopengl32
-LIBS ?= -L/usr/SFML-2.6.1/lib -lsfml-window -lsfml-graphics -lsfml-system
 INC = -I/usr/local/SFML/include
 
 momentum: momentum.exe
@@ -10,6 +9,12 @@ momentum: momentum.exe
 
 momentum_s: momentum_s.exe
 	
+
+lvlBuild: lvlBuild.exe momentum.exe
+	
+build: lvlBuild.exe momentum.exe
+	./momentum.exe --building &
+	./lvlBuild.exe
 
 obj/%.o: %.cpp
 	mkdir -p obj
@@ -21,6 +26,9 @@ momentum_s.exe: obj/momentum.o obj/gameObjects.o obj/level.o
 momentum.exe: obj/momentum.o obj/gameObjects.o obj/level.o
 	$(CXX) -O2 $^ -o momentum $(LIBS)
 
+lvlBuild.exe: obj/gameObjects.o obj/level.o obj/lvlBuild.o
+	$(CXX) -O2 $^ -o lvlBuild $(LIBS)
+	
 test: obj/test.o
 	$(CXX) $(C++FLAGS) test.o -o test $(LIBS)
 

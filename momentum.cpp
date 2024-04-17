@@ -2,18 +2,20 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <cstring>
 
 #include "gameObjects.h"
 #include "level.h"
 
 int main(int argc, char** argv){
-	sf::RenderWindow window(sf::VideoMode(640,360),"test");
+	sf::RenderWindow window(sf::VideoMode(640,360),"Momentum");
 	window.setKeyRepeatEnabled(false);
 	sf::Clock clock;
 	float timer=0.f;
 	level cLevel;
 	playerObject player;
 	uint8_t input=0;
+	bool building=false;
 	sf::Keyboard::Key up=sf::Keyboard::Key::W;
 	sf::Keyboard::Key down=sf::Keyboard::Key::S;
 	sf::Keyboard::Key left=sf::Keyboard::Key::A;
@@ -23,16 +25,22 @@ int main(int argc, char** argv){
 	std::vector<aabb> toDraw;
 	std::ifstream fin;
 	if(argc>1)
-		fin.open(argv[1]);
+		if(!strcmp(argv[1], "--building"))
+			building=true;
+		else
+			fin.open(argv[1]);
 	else
 		fin.open("levels/lv1.txt");
-	if(!fin.is_open()){
-		std::cerr<<"failed to load level"<<std::endl;
-		return 1;
+	if(!building){
+		if(!fin.is_open()){
+			std::cerr<<"failed to load level"<<std::endl;
+			return 1;
+		}
+		cLevel.load_level(fin);
+		cLevel.ready_player(player);
+		cLevel.get_drawn(toDraw);
+		fin.close();
 	}
-	cLevel.load_level(fin);
-	cLevel.ready_player(player);
-	cLevel.get_drawn(toDraw);
 	while(window.isOpen()){
 		timer+=clock.restart().asSeconds();
 		sf::Event event;
@@ -48,6 +56,14 @@ int main(int argc, char** argv){
 					input|=event.key.code==right ? 8:0;
 					input|=event.key.code==shift ? 16:0;
 					input|=event.key.code==jump ? 32:0;
+					if(building&&event.key.code==sf::Keyboard::Key::L){
+						fin.open("levels/lvltest");
+						cLevel.load_level(fin);
+						cLevel.ready_player(player);
+						toDraw.clear();
+						cLevel.get_drawn(toDraw);
+						fin.close();
+					}
 					break;
 				case sf::Event::KeyReleased:
 					input^=event.key.code==up ? 1:0;
