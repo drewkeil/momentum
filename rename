@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if ! [ $# = 2 ]; then
+	echo "must have exactly two arguments (file to rename and new name)" 
+fi
+
+files=levels/*
+for x in $files; do
+	sed -i -E -e "s/$1/$2/" $x
+	if [ $x = "levels/$1" ]; then
+		mv $x "levels/$2"
+	fi
+done

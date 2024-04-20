@@ -31,7 +31,7 @@ int main(int argc, char** argv){
 			cLevel.load_level(argv[1], "none");
 	}
 	if(!building){
-		cLevel.load_level("lv1.txt", "none");
+		cLevel.load_level("lv1", "none");
 		cLevel.ready_player(player);
 		cLevel.get_drawn(toDraw);
 	}

@@ -13,7 +13,7 @@
 #then names of levels in the same order as the goal they correspond to, one per line
 1
 640 0 10 360
-lv1.txt
+lv1
 #fourth section, number of platforms then number of spikes followed by
 #platform topLeft x y size x y one per line folowed by spike topLeft x y one per line
 3
