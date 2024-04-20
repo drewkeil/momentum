@@ -23,23 +23,17 @@ int main(int argc, char** argv){
 	sf::Keyboard::Key shift=sf::Keyboard::Key::LShift;
 	sf::Keyboard::Key jump=sf::Keyboard::Key::Space;
 	std::vector<aabb> toDraw;
-	std::ifstream fin;
-	if(argc>1)
+
+	if(argc>1){
 		if(!strcmp(argv[1], "--building"))
 			building=true;
 		else
-			fin.open(argv[1]);
-	else
-		fin.open("levels/lv1.txt");
+			cLevel.load_level(argv[1], "none");
+	}
 	if(!building){
-		if(!fin.is_open()){
-			std::cerr<<"failed to load level"<<std::endl;
-			return 1;
-		}
-		cLevel.load_level(fin);
+		cLevel.load_level("lv1.txt", "none");
 		cLevel.ready_player(player);
 		cLevel.get_drawn(toDraw);
-		fin.close();
 	}
 	while(window.isOpen()){
 		timer+=clock.restart().asSeconds();
@@ -57,12 +51,10 @@ int main(int argc, char** argv){
 					input|=event.key.code==shift ? 16:0;
 					input|=event.key.code==jump ? 32:0;
 					if(building&&event.key.code==sf::Keyboard::Key::L){
-						fin.open("levels/lvltest");
-						cLevel.load_level(fin);
+						cLevel.load_level("lvltest", "none");
 						cLevel.ready_player(player);
 						toDraw.clear();
 						cLevel.get_drawn(toDraw);
-						fin.close();
 					}
 					break;
 				case sf::Event::KeyReleased:

@@ -1,10 +1,28 @@
-360 800
+# lines statring with # are comments and get ignored
+# comments are only allowed between sections
+#first section, death height
+400
+#second section, number of elements in name to spawn map followed by
+#name to spawn map, formated name 0 x0 y0... name n-1 xn-1 yn-1 xn yn, xn yn is default
+#the use of level names here and in section 3 makes renaming levels a pain, so I plan to automate
+#this with a bash script
+0
 50 0
-3 4
-0.0 350.0 1500.0 200.0
-100.0 20.0 10.0 10.0
-200.0 50.0 20.0 100.0
-100.0 100.0
-20.0 200.0
-40.0 40.0
-600.0 340.0
+#third section, number of elements in goal vector, each element is topLeft x y then size x y
+#followed by list of goals, each on an individual line
+#then names of levels in the same order as the goal they correspond to, one per line
+1
+640 0 10 360
+lv1.txt
+#fourth section, number of platforms then number of spikes followed by
+#platform topLeft x y size x y one per line folowed by spike topLeft x y one per line
+3
+4
+0 350 1500 200
+100 20 10 10
+200 50 20 100
+100 100
+20 200
+40 40
+600 340
+# end of level file

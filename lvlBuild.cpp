@@ -8,39 +8,97 @@
 struct build{
 	std::vector<aabb> spikes;
 	std::vector<aabb> platforms;
-	vector2 spawn;
+	std::vector<aabb> goals;
+	std::vector<std::string> names;
+	std::vector<vector2> spawns;
+	std::string name;
+	vector2 defaultSpawn;
 	float deathHeight;
-	float goal;
 };
 
-void print_build(std::ostream& os, build& l){
-	os<<l.goal<<' '<<l.deathHeight<<'\n';
-	os<<l.spawn.x<<' '<<l.spawn.y<<'\n';
-	os<<l.platforms.size()<<' '<<l.spikes.size()<<'\n';
-	for(aabb& rect:l.platforms)
+void print_build(std::ostream& os, build& b){
+	os<<"#death height\n";
+	os<<b.deathHeight<<'\n';
+	os<<"#name to spawn map\n"<<b.spawns.size()<<'\n';
+	for(size_t i=0;i<b.spawns.size();++i)
+		os<<b.names[i]<<' '<<b.spawns[i].x<<' '<<b.spawns[i].y<<' ';
+	os<<b.defaultSpawn.x<<' '<<b.defaultSpawn.y<<'\n';
+	os<<"#goals list\n"<<b.names.size()<<'\n';
+	for(aabb& g:b.goals)
+		os<<g.topLeft.x<<' '<<g.topLeft.y<<' '<<g.size.x<<' '<<g.size.y<<'\n';
+	for(std::string& str:b.names)
+		os<<str<<'\n';
+	os<<"#platforms and spikes\n"<<b.platforms.size()<<'\n'<<b.spikes.size()<<'\n';
+	for(aabb& rect:b.platforms)
 		os<<rect.topLeft.x<<' '<<rect.topLeft.y<<' '<<rect.size.x<<' '<<rect.size.y<<'\n';
-	for(aabb& rect:l.spikes)
+	for(aabb& rect:b.spikes)
 		os<<rect.topLeft.x<<' '<<rect.topLeft.y<<'\n';
 }
 
-void load_build(std::istream& is, build& l){
-	int p,s;
-	is>>l.goal>>l.deathHeight;
-	is>>l.spawn.x>>l.spawn.y>>p>>s;
-	l.platforms.resize(p);
+void load_build(std::string lvlname, build& b){
+	std::ifstream fin;
+	b.name=lvlname;
+	lvlname.insert(0,"levels/");
+	fin.open(lvlname);
+	if(!fin.is_open()){
+		std::cerr<<"unable to open "<<lvlname<<std::endl;
+		exit(1);
+	}
+
+	//section 1
+	std::string tmp;
+	std::getline(fin, tmp);
+	while(tmp[0]=='#')
+		std::getline(fin, tmp);
+	b.deathHeight=std::stoi(tmp);
+	
+	//section 2
+	std::getline(fin, tmp);
+	while(tmp[0]=='#')
+		std::getline(fin, tmp);
+	int p, s;
+	s=std::stoi(tmp);
+	b.names.resize(s);
+	b.spawns.resize(s);
+	for(int i=0;i<s;++i){
+		fin>>b.names[i];
+		fin>>b.spawns[i].x>>b.spawns[i].y;
+	}
+	fin>>b.defaultSpawn.x>>b.defaultSpawn.y;
+	
+	//section 3
+	std::getline(fin, tmp);
+	while(tmp[0]=='#'||tmp[0]=='\0')
+		std::getline(fin, tmp);
+	p=std::stoi(tmp);
+	b.goals.resize(p);
+	for(aabb& g:b.goals)
+		fin>>g.topLeft.x>>g.topLeft.y>>g.size.x>>g.size.y;
+	b.names.resize(p);
+	for(std::string& lvn:b.names)
+		fin>>lvn;
+
+	//section 4
+	std::getline(fin, tmp);
+	while(tmp[0]=='#'||tmp[0]=='\0')
+		std::getline(fin, tmp);
+	p=std::stoi(tmp);
+	fin>>s;
+	b.platforms.resize(p);
 	for(int i=0;i<p;++i){
-		aabb& pl=l.platforms[i];
-		is>>pl.topLeft.x>>pl.topLeft.y>>pl.size.x>>pl.size.y;
+		aabb& pl=b.platforms[i];
+		fin>>pl.topLeft.x>>pl.topLeft.y>>pl.size.x>>pl.size.y;
 		pl.color=sf::Color::Black;
 	}
-	l.spikes.resize(s);
+	b.spikes.resize(s);
 	for(int i=0;i<s;++i){
-		aabb& sp=l.spikes[i];
-		is>>sp.topLeft.x>>sp.topLeft.y;
+		aabb& sp=b.spikes[i];
+		fin>>sp.topLeft.x>>sp.topLeft.y;
 		sp.size.x=5;
 		sp.size.y=5;
 		sp.color=sf::Color::Red;
 	}
+	fin.close();
 }
 
 std::vector<aabb> get_drawn(build& b){
@@ -51,7 +109,7 @@ std::vector<aabb> get_drawn(build& b){
 		drawn.push_back(pl);
 	aabb player;
 	player.color=sf::Color::Black;
-	player.topLeft=b.spawn;
+	player.topLeft=b.defaultSpawn;
 	player.size.x=10;
 	player.size.y=25;
 	drawn.push_back(player);
@@ -62,23 +120,21 @@ enum Mode {none, box1, box2, spike, player};
 
 int main(int argc, char** argv){
 	//  steps for test play:
-	//		1. write level to predetermined file (levels/testlvl)
+	//		1. write level to predetermined file (levels/lvltest)
 	//		2. use keypress in special momentum that re-reads level from correct file
 	//		3. play epicly then leave open
 
 	build b;
-	b.goal=640;
 	b.deathHeight=400;
 	Mode state=none;
 	sf::RenderWindow window(sf::VideoMode(640,360),"Level Builder");
 	window.setKeyRepeatEnabled(false);
 	aabb placingObject;
 	std::vector<aabb> toDraw;
-	std::ifstream fin;
 	vector2 mousePos;
 	if(argc>1){
-		fin.open(argv[1]);
-		load_build(fin, b);
+		load_build(argv[1], b);
+		toDraw=get_drawn(b);
 	}
 	bool mousePressed=false;
 	bool box=false;
@@ -162,7 +218,7 @@ int main(int argc, char** argv){
 			case player:
 				placingObject.topLeft=mousePos;
 				if(mousePressed){	
-					b.spawn=mousePos;
+					b.defaultSpawn=mousePos;
 					state=none;
 					toDraw=get_drawn(b);
 				}
