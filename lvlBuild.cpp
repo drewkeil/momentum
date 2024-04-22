@@ -11,7 +11,6 @@ struct build{
 	std::vector<aabb> goals;
 	std::vector<std::string> names;
 	std::vector<vector2> spawns;
-	std::string name;
 	vector2 defaultSpawn;
 	float deathHeight;
 };
@@ -37,7 +36,6 @@ void print_build(std::ostream& os, build& b){
 
 void load_build(std::string lvlname, build& b){
 	std::ifstream fin;
-	b.name=lvlname;
 	lvlname.insert(0,"levels/");
 	fin.open(lvlname);
 	if(!fin.is_open()){
@@ -72,8 +70,10 @@ void load_build(std::string lvlname, build& b){
 		std::getline(fin, tmp);
 	p=std::stoi(tmp);
 	b.goals.resize(p);
-	for(aabb& g:b.goals)
+	for(aabb& g:b.goals){
 		fin>>g.topLeft.x>>g.topLeft.y>>g.size.x>>g.size.y;
+		g.color=sf::Color::Green;
+	}
 	b.names.resize(p);
 	for(std::string& lvn:b.names)
 		fin>>lvn;
@@ -105,18 +105,24 @@ std::vector<aabb> get_drawn(build& b){
 	std::vector<aabb> drawn;
 	for(aabb& sp:b.spikes)
 		drawn.push_back(sp);
+	
 	for(aabb& pl:b.platforms)
 		drawn.push_back(pl);
+	
+	for(aabb& g:b.goals)
+		drawn.push_back(g);
+	
 	aabb player;
 	player.color=sf::Color::Black;
 	player.topLeft=b.defaultSpawn;
 	player.size.x=PLAYER_WIDTH;
 	player.size.y=PLAYER_HEIGHT;
 	drawn.push_back(player);
+
 	return drawn;
 }
 
-enum Mode {none, box1, box2, spike, player};
+enum Mode {none, box1, box2, spike, player, goal1, goal2, command};
 
 int main(int argc, char** argv){
 	//  steps for test play:
@@ -136,22 +142,11 @@ int main(int argc, char** argv){
 		load_build(argv[1], b);
 		toDraw=get_drawn(b);
 	}
-	bool mousePressed=false;
-	bool box=false;
-	bool spikep=false;
-	bool playerp=false;
-	bool delS=false;
-	bool delB=false;
-	bool write=false;
+	// mousePressed, box, spike, player, delete spike, delete box, write, goal, command
+	bool pressed[9]={};
 	while(window.isOpen()){
 		sf::Event event;
-		mousePressed=false;
-		box=false;
-		spikep=false;
-		playerp=false;
-		delS=false;
-		delB=false;
-		write=false;
+		pressed={};
 		
 		while(window.pollEvent(event)){
 			switch(event.type){
@@ -159,12 +154,14 @@ int main(int argc, char** argv){
 					window.close();
 					break;
 				case sf::Event::KeyPressed:
-					box=event.key.code==sf::Keyboard::Key::B;
-					spikep=event.key.code==sf::Keyboard::Key::S;
-					playerp=event.key.code==sf::Keyboard::Key::P;
-					delS=event.key.code==sf::Keyboard::Key::D;
-					delB=event.key.code==sf::Keyboard::Key::N;
-					write=event.key.code==sf::Keyboard::Key::W;
+					pressed[1]=event.key.code==sf::Keyboard::Key::B;
+					pressed[2]=event.key.code==sf::Keyboard::Key::S;
+					pressed[3]=event.key.code==sf::Keyboard::Key::P;
+					pressed[4]=event.key.code==sf::Keyboard::Key::D;
+					pressed[5]=event.key.code==sf::Keyboard::Key::N;
+					pressed[6]=event.key.code==sf::Keyboard::Key::W;
+					pressed[7]=event.key.code==sf::Keyboard::Key::G;
+					pressed[8]=event.key.code==sf::Keyboard::Key::Semicolon;
 					break;
 				case sf::Event::MouseMoved:{
 					sf::Vector2i mpos(event.mouseMove.x, event.mouseMove.y);
@@ -173,7 +170,7 @@ int main(int argc, char** argv){
 					break;
 				}
 				case sf::Event::MouseButtonPressed:
-					mousePressed=true;
+					pressed[0]=true;
 					break;
 				default:
 					break;
@@ -182,7 +179,7 @@ int main(int argc, char** argv){
 		}
 		switch(state){
 			case box1:
-				if(mousePressed){	
+				if(pressed[0]){	
 					placingObject.topLeft=mousePos;
 					placingObject.size.x=0;
 					placingObject.size.y=0;
@@ -192,7 +189,7 @@ int main(int argc, char** argv){
 			case box2:
 				placingObject.size.x=mousePos.x-placingObject.topLeft.x;
 				placingObject.size.y=mousePos.y-placingObject.topLeft.y;
-				if(mousePressed){
+				if(pressed[0]){
 					state=none;
 					if(placingObject.size.x<0){
 						placingObject.topLeft.x+=placingObject.size.x;
@@ -206,9 +203,34 @@ int main(int argc, char** argv){
 					toDraw=get_drawn(b);
 				}
 				break;
+			case goal1:
+				if(pressed[0]){	
+					placingObject.topLeft=mousePos;
+					placingObject.size.x=0;
+					placingObject.size.y=0;
+					state=goal2;
+				}
+				break;
+			case goal2:
+				placingObject.size.x=mousePos.x-placingObject.topLeft.x;
+				placingObject.size.y=mousePos.y-placingObject.topLeft.y;
+				if(pressed[0]){
+					state=none;
+					if(placingObject.size.x<0){
+						placingObject.topLeft.x+=placingObject.size.x;
+						placingObject.size.x*=-1;
+					}
+					if(placingObject.size.y<0){
+						placingObject.topLeft.y+=placingObject.size.y;
+						placingObject.size.y*=-1;
+					}
+					b.goals.push_back(placingObject);
+					toDraw=get_drawn(b);
+				}
+				break;
 			case spike:
 				placingObject.topLeft=mousePos;
-				if(mousePressed){	
+				if(pressed[0]){	
 					placingObject.topLeft=mousePos;
 					state=none;
 					b.spikes.push_back(placingObject);
@@ -217,40 +239,43 @@ int main(int argc, char** argv){
 				break;
 			case player:
 				placingObject.topLeft=mousePos;
-				if(mousePressed){	
+				if(pressed[0]){	
 					b.defaultSpawn=mousePos;
 					state=none;
 					toDraw=get_drawn(b);
 				}
 				break;
 			case none:
-				if(delS){
+				if(pressed[4]){
 					if(!b.spikes.empty()){
 						b.spikes.pop_back();
 						toDraw=get_drawn(b);
 					}
-				}else if(delB){
+				}else if(pressed[5]){
 					if(!b.platforms.empty()){
 						b.platforms.pop_back();
 						toDraw=get_drawn(b);
 					}
-				}else if(box){
+				}else if(pressed[1]){
 					placingObject.color=sf::Color::Black;
 					state=box1;
-				}else if(spikep){
+				}else if(pressed[2]){
 					placingObject.color=sf::Color::Red;
-					placingObject.size.x=5; // i think this is wrong
+					placingObject.size.x=5;
 					placingObject.size.y=5;
 					state=spike;
-				}else if(playerp){
+				}else if(pressed[3]){
 					placingObject.color=sf::Color::Black;
 					placingObject.size.x=PLAYER_WIDTH;
 					placingObject.size.y=PLAYER_HEIGHT;
 					state=player;
-				}else if(write){
+				}else if(pressed[6]){
 					std::ofstream fout;
 					fout.open("levels/lvltest");
 					print_build(fout, b);
+				}else if(pressed[7]){
+					placingObject.color=sf::Color::Green;
+					state=goal1;
 				}
 			default:
 				break;
