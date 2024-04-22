@@ -10,7 +10,7 @@ void level::get_drawn(std::vector<aabb>& drawn){
 		drawn.push_back(s);
 }
 
-void level::load_level(std::string lvlname, std::string prevName){
+void level::load_level(std::string lvlname, std::string prevName, playerObject& pl){
 	std::ifstream fin;
 	name=lvlname;
 	lvlname.insert(0,"levels/");
@@ -32,20 +32,45 @@ void level::load_level(std::string lvlname, std::string prevName){
 	while(tmp[0]=='#')
 		std::getline(fin, tmp);
 	int p, s;
+	float temp;
 	bool found=false;
+	std::string ops;
 	s=std::stoi(tmp);
 	for(int i=0;i<s;++i){
 		fin>>tmp;
+		size_t opsLoc=tmp.find(':');
+		if(opsLoc!=std::string::npos){
+			ops=tmp.substr(opsLoc+1);
+			tmp=tmp.substr(0,opsLoc);
+		}
 		if(tmp==prevName){
-			fin>>spawn.x>>spawn.y;
+			fin>>pl.spawnPoint.x>>pl.spawnPoint.y;
 			found=true;
 		}else
-			fin>>p>>p;
+			fin>>temp>>temp;
 	}
 	if(!found)
-		fin>>spawn.x>>spawn.y;
+		fin>>ops>>pl.spawnPoint.x>>pl.spawnPoint.y;
 	else
-		fin>>p>>p;
+		fin>>tmp>>temp>>temp;
+	vector2 plPos=pl.topLeft;
+	pl.topLeft=pl.spawnPoint;
+	for(char& ch:ops){
+		switch(ch){
+			case 'x':
+				pl.topLeft.x=plPos.x;
+				break;
+			case 'y':
+				pl.topLeft.y=plPos.y;
+				break;
+			case 's':
+				pl.velocity.y=0;
+				pl.velocity.x=0;
+				break;
+			default:
+				break;
+		}
+	}			
 	
 	//section 3
 	std::getline(fin, tmp);
@@ -83,33 +108,25 @@ void level::load_level(std::string lvlname, std::string prevName){
 }
 
 
-void level::collide_player(playerObject& p){
+bool level::collide_player(playerObject& p){
+	for(size_t i=0;i<goals.size();++i){
+		if(goals[i].colliding(p)){
+			load_level(next[i], name, p);
+			return true;
+		}
+	}
 	if(p.topLeft.y>deathHeight)
 		p.respawn();
 	for(aabb spike:spikes){
 		if(spike.colliding(p)){
 			p.respawn();
-			return;
+			return false;
 		}
 	}
 	for(aabb platform:platforms){
 		if(platform.colliding(p)){
-			//std::cout<<"hit platform"<<std::endl;
 			p.collide(platform);
 		}
-	}
-}
-
-void level::ready_player(playerObject& p){
-	p.spawnPoint.x=spawn.x;
-	p.spawnPoint.y=spawn.y;
-	p.respawn();
-}
-
-bool level::level_finished(playerObject& p){
-	for(size_t i=0;i<goals.size(); ++i){
-		if(goals[i].colliding(p))
-			return true;
 	}
 	return false;
 }

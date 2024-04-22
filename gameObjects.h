@@ -21,8 +21,10 @@ public:
 
 	bool colliding(aabb& other);
 };
-
+#define PLAYER_HEIGHT 20
+#define PLAYER_WIDTH 10
 class playerObject:public aabb{
+	friend class level;
 public:
 	vector2 spawnPoint;
 

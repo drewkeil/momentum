@@ -3,17 +3,18 @@
 #first section, death height
 400
 #second section, number of elements in name to spawn map followed by
-#name to spawn map, formated name 0 x0 y0... name n-1 xn-1 yn-1 xn yn, xn yn is default
-#the use of level names here and in section 3 makes renaming levels a pain, so I plan to automate
-#this with a bash script
-0
-50 0
+#name to spawn map, formated name:ops 0 x0 y0... name:ops n-1 xn-1 yn-1 xn yn, ops xn yn is default
+#the use of level names here and in section 3 makes renaming levels a pain, so use the rename bash script
+#names are followed by ops deliminated by :, : is not allowed to appear elsewhere in name
+#ops are x preserve player x position, y preserve player y position, s stop velocity, n nothing
+1
+lv2:y 625 325 n 50 0
 #third section, number of elements in goal vector, each element is topLeft x y then size x y
 #followed by list of goals, each on an individual line
 #then names of levels in the same order as the goal they correspond to, one per line
 1
 640 0 10 360
-lv1
+lv2
 #fourth section, number of platforms then number of spikes followed by
 #platform topLeft x y size x y one per line folowed by spike topLeft x y one per line
 3

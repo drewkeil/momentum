@@ -22,7 +22,7 @@ void print_build(std::ostream& os, build& b){
 	os<<"#name to spawn map\n"<<b.spawns.size()<<'\n';
 	for(size_t i=0;i<b.spawns.size();++i)
 		os<<b.names[i]<<' '<<b.spawns[i].x<<' '<<b.spawns[i].y<<' ';
-	os<<b.defaultSpawn.x<<' '<<b.defaultSpawn.y<<'\n';
+	os<<"n "<<b.defaultSpawn.x<<' '<<b.defaultSpawn.y<<'\n';
 	os<<"#goals list\n"<<b.names.size()<<'\n';
 	for(aabb& g:b.goals)
 		os<<g.topLeft.x<<' '<<g.topLeft.y<<' '<<g.size.x<<' '<<g.size.y<<'\n';
@@ -58,13 +58,13 @@ void load_build(std::string lvlname, build& b){
 		std::getline(fin, tmp);
 	int p, s;
 	s=std::stoi(tmp);
+	++s;
 	b.names.resize(s);
 	b.spawns.resize(s);
 	for(int i=0;i<s;++i){
 		fin>>b.names[i];
 		fin>>b.spawns[i].x>>b.spawns[i].y;
 	}
-	fin>>b.defaultSpawn.x>>b.defaultSpawn.y;
 	
 	//section 3
 	std::getline(fin, tmp);
@@ -110,8 +110,8 @@ std::vector<aabb> get_drawn(build& b){
 	aabb player;
 	player.color=sf::Color::Black;
 	player.topLeft=b.defaultSpawn;
-	player.size.x=10;
-	player.size.y=25;
+	player.size.x=PLAYER_WIDTH;
+	player.size.y=PLAYER_HEIGHT;
 	drawn.push_back(player);
 	return drawn;
 }
@@ -244,8 +244,8 @@ int main(int argc, char** argv){
 					state=spike;
 				}else if(playerp){
 					placingObject.color=sf::Color::Black;
-					placingObject.size.x=10;
-					placingObject.size.y=25;
+					placingObject.size.x=PLAYER_WIDTH;
+					placingObject.size.y=PLAYER_HEIGHT;
 					state=player;
 				}else if(write){
 					std::ofstream fout;

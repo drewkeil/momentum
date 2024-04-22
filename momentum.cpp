@@ -27,12 +27,12 @@ int main(int argc, char** argv){
 	if(argc>1){
 		if(!strcmp(argv[1], "--building"))
 			building=true;
-		else
-			cLevel.load_level(argv[1], "none");
-	}
-	if(!building){
-		cLevel.load_level("lv1", "none");
-		cLevel.ready_player(player);
+		else{
+			cLevel.load_level(argv[1], "none", player);
+			cLevel.get_drawn(toDraw);
+		}
+	}else{
+		cLevel.load_level("lv1", "none", player);
 		cLevel.get_drawn(toDraw);
 	}
 	while(window.isOpen()){
@@ -51,8 +51,7 @@ int main(int argc, char** argv){
 					input|=event.key.code==shift ? 16:0;
 					input|=event.key.code==jump ? 32:0;
 					if(building&&event.key.code==sf::Keyboard::Key::L){
-						cLevel.load_level("lvltest", "none");
-						cLevel.ready_player(player);
+						cLevel.load_level("lvltest", "none", player);
 						toDraw.clear();
 						cLevel.get_drawn(toDraw);
 					}
@@ -73,7 +72,10 @@ int main(int argc, char** argv){
 			player.process_input(input);
 			input&=207;
 			player.update();
-			cLevel.collide_player(player);
+			if(cLevel.collide_player(player)){
+				toDraw.clear();
+				cLevel.get_drawn(toDraw);
+			}
 		}
 		window.clear(sf::Color::White);
 		for(aabb rect:toDraw){

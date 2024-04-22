@@ -61,17 +61,17 @@ void playerObject::collide(aabb& other){ // split this into 2 functions, collide
 }
 
 void playerObject::process_input(uint8_t input){
-	velocity.y+=0.3;
+	velocity.y+=0.2;
 	jumpBuffer-=std::min(jumpBuffer,1);
 	shiftBuffer-=std::min(shiftBuffer,1);
 	if(input&4)
-		velocity.x-=0.1/((abs(velocity.x)+2.5)/5);
+		velocity.x-=0.07/((abs(velocity.x)+2.5)/5);
 	if(input&8)
-		velocity.x+=0.1/((abs(velocity.x)+2.5)/5);
+		velocity.x+=0.07/((abs(velocity.x)+2.5)/5);
 	if((input&32))
 		jumpBuffer=5;
 	if(jumpBuffer&&(grounded||coyote)){
-		velocity.y-=5;
+		velocity.y-=4.5f;
 		jumpBuffer=0;
 		coyote=0;
 	}
@@ -81,7 +81,7 @@ void playerObject::process_input(uint8_t input){
 		--shifts;
 		shiftBuffer=0;
 		if(input&0x1){
-			velocity.y=-(abs(velocity.x)+abs(velocity.y));
+			velocity.y=-sqrt(velocity.x*velocity.x+velocity.y*velocity.y);
 			velocity.x=0;
 			if(input&8){
 				velocity.y/=1.4142135623f;
@@ -91,7 +91,7 @@ void playerObject::process_input(uint8_t input){
 				velocity.x=velocity.y;
 			}
 		}else if(input&0x2){
-			velocity.y=(abs(velocity.x)+abs(velocity.y));
+			velocity.y=sqrt(velocity.x*velocity.x+velocity.y*velocity.y);
 			velocity.x=0;
 			if(input&8){
 				velocity.y/=1.4142135623f;
@@ -101,10 +101,10 @@ void playerObject::process_input(uint8_t input){
 				velocity.x=-velocity.y;
 			}
 		}else if(input&0x4){
-			velocity.x=-(abs(velocity.x)+abs(velocity.y));
+			velocity.x=-sqrt(velocity.x*velocity.x+velocity.y*velocity.y);
 			velocity.y=0;
 		}else if(input&0x8){
-			velocity.x=(abs(velocity.x)+abs(velocity.y));
+			velocity.x=sqrt(velocity.x*velocity.x+velocity.y*velocity.y);
 			velocity.y=0;
 		}
 	}
@@ -136,7 +136,14 @@ void playerObject::respawn(){
 }
 
 playerObject::playerObject(){
-	size.x=10;
-	size.y=25;
+	size.x=PLAYER_WIDTH;
+	size.y=PLAYER_HEIGHT;
 	color=sf::Color::Black;
+	velocity.x=0;
+	velocity.y=0;
+	jumpBuffer=0;
+	shiftBuffer=0;
+	grounded=false;
+	coyote=0;
+	shifts=0;
 }

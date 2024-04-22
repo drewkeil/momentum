@@ -1,18 +1,18 @@
 #death height
 400
 #name to spawn map
-0
-50 0
-#goals list
 1
+lv3:y 625 325 y 0 325
+#goals list
+2
 640 0 10 360
+-10 0 5 360
+lv3
 lv1
 #platforms and spikes
-3
+1
 4
-0 350 1500 200
-100 20 10 10
-200 50 20 100
+0 350 640 360
 100 100
 20 200
 40 40

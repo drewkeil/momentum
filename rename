@@ -6,7 +6,7 @@ fi
 
 files=levels/*
 for x in $files; do
-	sed -i -E -e "s/$1/$2/" $x
+	sed -i -E -e "s/(\b)$1(\b|:)/\1$2\2/" $x
 	if [ $x = "levels/$1" ]; then
 		mv $x "levels/$2"
 	fi
