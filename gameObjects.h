@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <SFML/Graphics.hpp>
+#include <string>
 
 struct vector2{
 	float x;
@@ -39,6 +40,8 @@ public:
 	void respawn();
 	
 	void update();
+
+	void show_velocity(std::string& str);
 
 private:
 	

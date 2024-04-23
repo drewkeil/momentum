@@ -1,7 +1,7 @@
 CXX = x86_64-w64-mingw32-g++
 CXX ?= g++
 C++FLAGS ?= -Wall -Werror -pedantic -O2 -static -DSFML_STATIC
-LIBS = -L/usr/local/SFML/lib -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lwinmm -lgdi32 -lopengl32
+LIBS = -L/usr/local/SFML/lib -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lwinmm -lgdi32 -lopengl32 -lfreetype
 INC = -I/usr/local/SFML/include
 
 momentum: momentum.exe
@@ -10,7 +10,7 @@ momentum: momentum.exe
 momentum_s: momentum_s.exe
 	
 
-lvlBuild: lvlBuild.exe momentum.exe
+lvlBuild: lvlBuild.exe
 	
 build: lvlBuild.exe momentum.exe
 	./momentum.exe --building &

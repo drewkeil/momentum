@@ -24,9 +24,23 @@ int main(int argc, char** argv){
 	sf::Keyboard::Key jump=sf::Keyboard::Key::Space;
 	std::vector<aabb> toDraw;
 
+	sf::Font arial;
+	if(!arial.loadFromFile("fonts/arial.ttf")){
+		std::cerr<<"unable to load font"<<std::endl;
+		return 1;
+	}
+	sf::Text text;
+	text.setFont(arial);
+	text.setCharacterSize(15);
+	text.setFillColor(sf::Color::Black);
+	text.setPosition(5, 5);
+	bool showSpeed=false;
+
 	if(argc>1){
 		if(!strcmp(argv[1], "--building"))
 			building=true;
+		else if(!strcmp(argv[1], "--speed")
+			showSpeed=true;
 		else{
 			cLevel.load_level(argv[1], "none", player);
 			cLevel.get_drawn(toDraw);
@@ -96,6 +110,10 @@ int main(int argc, char** argv){
 			sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f))
 		};
 		window.draw(verticies, 5, sf::LineStrip);
+		if(showSpeed){
+			text.setString(""+player.velocity.x + ", " +player.velocity.y);
+			window.draw(text);
+		}
 		window.display();
 	}
 }

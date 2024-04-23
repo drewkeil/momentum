@@ -1,0 +1,14 @@
+#death height
+400
+#name to spawn map
+0
+y 8 330
+#goals list
+1
+640 -48 25 407
+testspeed
+#platforms and spikes
+2
+0
+0 350 640 10
+0 0 6 350

@@ -147,3 +147,7 @@ playerObject::playerObject(){
 	coyote=0;
 	shifts=0;
 }
+
+void playerObject::show_velocity(std::string& str){
+	str=""+velocity.x+", "+velocity.y;
+}
