@@ -35,7 +35,7 @@ public:
 
 	// input is a bitmask representing which buttons are pressed
 	// from lsb to msb: up, down, left, right, shift, jump
-	void process_input(uint8_t input);
+	void process_input(uint8_t input, bool jumpHeld);
 
 	void respawn();
 	
@@ -51,6 +51,7 @@ private:
 	int shiftBuffer;
 	bool grounded;
 	int shifts;
+	int jumpTimer;
 };
 
 #endif

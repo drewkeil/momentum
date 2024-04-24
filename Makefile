@@ -33,4 +33,4 @@ test: obj/test.o
 	$(CXX) $(C++FLAGS) test.o -o test $(LIBS)
 
 clean:
-	rm -rf obj *.exe
+	rm -rf obj *.exe levels/lvltest

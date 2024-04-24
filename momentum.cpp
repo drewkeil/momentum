@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
-#include <cstring>
+#include <string>
 
 #include "gameObjects.h"
 #include "level.h"
@@ -15,6 +15,7 @@ int main(int argc, char** argv){
 	level cLevel;
 	playerObject player;
 	uint8_t input=0;
+	bool jumpHeld=false;
 	bool building=false;
 	sf::Keyboard::Key up=sf::Keyboard::Key::W;
 	sf::Keyboard::Key down=sf::Keyboard::Key::S;
@@ -37,12 +38,15 @@ int main(int argc, char** argv){
 	bool showSpeed=false;
 
 	if(argc>1){
-		if(!strcmp(argv[1], "--building"))
+		if(argv[1]==std::string("--building"))
 			building=true;
-		else if(!strcmp(argv[1], "--speed")
-			showSpeed=true;
 		else{
-			cLevel.load_level(argv[1], "none", player);
+			if(argv[1]==std::string("--speed")){
+				showSpeed=true;
+				cLevel.load_level(argv[2], "none", player);
+			}else
+				cLevel.load_level(argv[1], "none", player);
+			player.respawn();
 			cLevel.get_drawn(toDraw);
 		}
 	}else{
@@ -64,6 +68,7 @@ int main(int argc, char** argv){
 					input|=event.key.code==right ? 8:0;
 					input|=event.key.code==shift ? 16:0;
 					input|=event.key.code==jump ? 32:0;
+					jumpHeld=jumpHeld||event.key.code==jump;
 					if(building&&event.key.code==sf::Keyboard::Key::L){
 						cLevel.load_level("lvltest", "none", player);
 						toDraw.clear();
@@ -75,6 +80,7 @@ int main(int argc, char** argv){
 					input^=event.key.code==down ? 2:0;
 					input^=event.key.code==left ? 4:0;
 					input^=event.key.code==right ? 8:0;
+					jumpHeld=!(event.key.code==jump);
 					break;
 				default:
 					break;
@@ -83,7 +89,7 @@ int main(int argc, char** argv){
 		}
 		if(timer>=0.015625f){
 			timer=0;
-			player.process_input(input);
+			player.process_input(input, jumpHeld);
 			input&=207;
 			player.update();
 			if(cLevel.collide_player(player)){
@@ -111,7 +117,9 @@ int main(int argc, char** argv){
 		};
 		window.draw(verticies, 5, sf::LineStrip);
 		if(showSpeed){
-			text.setString(""+player.velocity.x + ", " +player.velocity.y);
+			std::string str;
+			player.show_velocity(str);
+			text.setString(str);
 			window.draw(text);
 		}
 		window.display();

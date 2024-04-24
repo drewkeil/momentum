@@ -2,13 +2,9 @@
 400
 #name to spawn map
 0
-y 5 330
+n 0 0
 #goals list
-1
-640 -48 25 407
-testspeed
-#platforms and spikes
-2
 0
-0 350 650 10
-0 0 5 350
+#platforms and spikes
+0
+0

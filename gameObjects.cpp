@@ -26,60 +26,64 @@ void playerObject::collide(aabb& other){ // split this into 2 functions, collide
 		minY=other.topLeft.y-(topLeft.y+size.y);
 	if(abs(minX)<abs(minY)){
 		if(minX<0&&velocity.x>0){
-			if(velocity.x>35){
-				respawn();
-				return;
-			}
+			//if(velocity.x>12){
+			//	respawn();
+			//	return;
+			//}
 			velocity.x=0;
 		}else if(velocity.x<0&&minX>0){
-			if(velocity.x<-35){
-				respawn();
-				return;
-			}
+			//if(velocity.x<-12){
+			//	respawn();
+			//	return;
+			//}
 			velocity.x=0;
 		}
 		topLeft.x+=minX;
 	}else{
 		if(minY<0&&velocity.y>0){
-			if(velocity.y>35){
-				respawn();
-				return;
-			}
+			//if(velocity.y>12){
+			//	respawn();
+			//	return;
+			//}
 			velocity.y=0;
 			grounded=true;
 			coyote=5;
 			shifts=std::max(shifts,1);
 		}else if(velocity.y<0&&minY>0){
-			if(velocity.y<-35){
-				respawn();
-				return;
-			}
+			//if(velocity.y<-12){
+			//	respawn();
+			//	return;
+			//}
 			velocity.y=0;
 		}
 		topLeft.y+=minY;
 	}
 }
 
-void playerObject::process_input(uint8_t input){
-	velocity.y+=0.2;
+void playerObject::process_input(uint8_t input, bool jumpHeld){
+	velocity.y+=(jumpHeld&&jumpTimer) ? 0.15:0.2;
 	jumpBuffer-=std::min(jumpBuffer,1);
 	shiftBuffer-=std::min(shiftBuffer,1);
+	jumpTimer-=std::min(jumpTimer,1);
 	if(input&4)
-		velocity.x-=0.07/((abs(velocity.x)+2.5)/5);
+		velocity.x-=0.35/(1.5*abs(velocity.x)+2.5);
 	if(input&8)
-		velocity.x+=0.07/((abs(velocity.x)+2.5)/5);
+		velocity.x+=0.35/(1.5*abs(velocity.x)+2.5);
 	if((input&32))
 		jumpBuffer=5;
-	if(jumpBuffer&&(grounded||coyote)){
-		velocity.y-=4.5f;
+	if(jumpBuffer&&coyote){
+		velocity.y-=3.6f;
 		jumpBuffer=0;
 		coyote=0;
+		jumpTimer=24;
 	}
 	if(input&16)
 		shiftBuffer=5;
 	if(shifts&&shiftBuffer){
 		--shifts;
 		shiftBuffer=0;
+		velocity.y-=std::max(0.05f*jumpTimer-0.64f,0.f);
+		jumpTimer=0;
 		if(input&0x1){
 			velocity.y=-sqrt(velocity.x*velocity.x+velocity.y*velocity.y);
 			velocity.x=0;
@@ -110,7 +114,7 @@ void playerObject::process_input(uint8_t input){
 	}
 	if(grounded){
 		grounded=false;
-		velocity.x*=0.99f;
+		velocity.x*=0.995f;
 		if(velocity.x>0&&!(input&8))
 			velocity.x-=std::min(velocity.x, 0.5f);
 		else if(velocity.x<0&&!(input&4))
@@ -133,6 +137,7 @@ void playerObject::respawn(){
 	shiftBuffer=0;
 	grounded=false;
 	coyote=0;
+	jumpTimer=0;
 }
 
 playerObject::playerObject(){
@@ -146,8 +151,9 @@ playerObject::playerObject(){
 	grounded=false;
 	coyote=0;
 	shifts=0;
+	jumpTimer=0;
 }
 
 void playerObject::show_velocity(std::string& str){
-	str=""+velocity.x+", "+velocity.y;
+	str=std::to_string(velocity.x)+", "+std::to_string(velocity.y);
 }
