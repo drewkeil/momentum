@@ -12,9 +12,13 @@ momentum_s: momentum_s.exe
 
 lvlBuild: lvlBuild.exe
 	
+
+lvlBuild_s: lvlBuild_s.exe
+	
+
 build: lvlBuild.exe momentum.exe
 	./momentum.exe --building &
-	./lvlBuild.exe
+	./lvlBuild.exe &
 
 obj/%.o: %.cpp
 	mkdir -p obj
@@ -28,7 +32,10 @@ momentum.exe: obj/momentum.o obj/gameObjects.o obj/level.o
 
 lvlBuild.exe: obj/gameObjects.o obj/level.o obj/lvlBuild.o
 	$(CXX) -O2 $^ -o lvlBuild $(LIBS)
-	
+
+lvlBuild_s.exe: obj/gameObjects.o obj/level.o obj/lvlBuild.o
+	$(CXX) -O2 -static $^ -o lvlBuild_s $(LIBS)
+ 	
 test: obj/test.o
 	$(CXX) $(C++FLAGS) test.o -o test $(LIBS)
 

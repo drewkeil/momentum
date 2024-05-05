@@ -14,7 +14,6 @@ class aabb{
 public: 
 	vector2 topLeft;
 	vector2 size; // width, height
-	sf::Color color;
 
 	aabb();
 
@@ -22,12 +21,19 @@ public:
 
 	bool colliding(aabb& other);
 };
+
+struct visibleObject{
+	aabb* object;
+	sf::Color color; // this will be replaced with sprite/texture stuff later
+};
+
 #define PLAYER_HEIGHT 20
 #define PLAYER_WIDTH 10
 class playerObject:public aabb{
 	friend class level;
 public:
 	vector2 spawnPoint;
+	sf::Color color;
 
 	playerObject();
 

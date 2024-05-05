@@ -3,11 +3,17 @@
 #include <string>
 #include <fstream>
 
-void level::get_drawn(std::vector<aabb>& drawn){
-	for(aabb p:platforms)
-		drawn.push_back(p);
-	for(aabb s:spikes)
-		drawn.push_back(s);
+void level::get_drawn(std::vector<visibleObject>& drawn){
+	drawn.resize(platforms.size()+spikes.size());
+	for(size_t i=0;i<platforms.size();++i){
+		drawn[i].object=&platforms[i];
+		drawn[i].color=sf::Color::Black;
+	}
+	size_t offset=platforms.size();
+	for(size_t i=0;i<spikes.size();++i){
+		drawn[i+offset].object=&spikes[i];
+		drawn[i+offset].color=sf::Color::Red;
+	}
 }
 
 void level::load_level(std::string lvlname, std::string prevName, playerObject& pl){
@@ -94,7 +100,6 @@ void level::load_level(std::string lvlname, std::string prevName, playerObject& 
 	for(int i=0;i<p;++i){
 		aabb& pl=platforms[i];
 		fin>>pl.topLeft.x>>pl.topLeft.y>>pl.size.x>>pl.size.y;
-		pl.color=sf::Color::Black;
 	}
 	spikes.resize(s);
 	for(int i=0;i<s;++i){
@@ -102,7 +107,6 @@ void level::load_level(std::string lvlname, std::string prevName, playerObject& 
 		fin>>sp.topLeft.x>>sp.topLeft.y;
 		sp.size.x=5;
 		sp.size.y=5;
-		sp.color=sf::Color::Red;
 	}
 	fin.close();
 }

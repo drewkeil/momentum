@@ -1,0 +1,21 @@
+#death height
+400
+#name to spawn map
+2
+secret4:x 377 0 test8:x 379 338 y -2 71
+#goals list
+3
+-22 6 7 85
+266 -10 241 8
+266 360 241 7
+test6
+secret4
+test8
+#platforms and spikes
+5
+0
+507 91 133 269
+-17 -2 283 8
+620 0 20 91
+507 -2 113 8
+-22 91 288 269

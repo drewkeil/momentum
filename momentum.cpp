@@ -23,7 +23,7 @@ int main(int argc, char** argv){
 	sf::Keyboard::Key right=sf::Keyboard::Key::D;
 	sf::Keyboard::Key shift=sf::Keyboard::Key::LShift;
 	sf::Keyboard::Key jump=sf::Keyboard::Key::Space;
-	std::vector<aabb> toDraw;
+	std::vector<visibleObject> toDraw;
 
 	sf::Font arial;
 	if(!arial.loadFromFile("fonts/arial.ttf")){
@@ -98,13 +98,14 @@ int main(int argc, char** argv){
 			}
 		}
 		window.clear(sf::Color::White);
-		for(aabb rect:toDraw){
+		for(visibleObject obj:toDraw){
+			aabb rect=*obj.object;
 			sf::Vertex verticies[5]= {
-				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), rect.color, sf::Vector2f(0.f, 0.f)),
-				sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y), rect.color, sf::Vector2f(0.f, 0.f)),
-				sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y+rect.size.y), rect.color, sf::Vector2f(0.f, 0.f)),
-				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y+rect.size.y), rect.color, sf::Vector2f(0.f, 0.f)),
-				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), rect.color, sf::Vector2f(0.f, 0.f))
+				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f)),
+				sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f)),
+				sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y+rect.size.y), obj.color, sf::Vector2f(0.f, 0.f)),
+				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y+rect.size.y), obj.color, sf::Vector2f(0.f, 0.f)),
+				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f))
 			};
 			window.draw(verticies, 5, sf::LineStrip);
 		}

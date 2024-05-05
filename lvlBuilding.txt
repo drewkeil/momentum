@@ -1,0 +1,56 @@
+the level builder is kinda bad but it is functional, I will use this file to explain all the commands and stuff.
+It is reccomended that you read through the examplelvl.txt file first as parts of the level file system are referenced in this explaination.
+
+it works by allowing you to enter different "modes" through key presses. The current mode can be seen in the bottom left corner of the screen.
+Note that entering a new mode can only be done when the current mode is none, in order to get back to none you need to complete whatever action you are currently taking.
+
+b, n: box and delete box
+pressing b allows you to place a box/platform. after pressing b left clicking will place the first corner, and clicking agin will place the second cornet, completing the box.
+n removes the most recently placed box, all delete keys work the same so I won't bother explaining any of the others.
+
+s, d: spike and delete spike
+lets younplace one spike(red box) by clicking
+
+p: set default spawn
+allows you to set the default spawn that will be used when the entrance level is not found in the level to spawn map
+
+w: quick write
+writes the level being built to levels/lvltest, this is the file that is loaded into the game when l is pressed if the game is started with --building
+
+l, k: level spawn and delete level spawn
+allows you to place a level specific spawn, after placing type the level name and options for the spawn and press enter
+
+g: goal
+allows a goal to be placed, works the same way as placing a box but with a third stage where the name of the level this goal leads to is entered.
+I forgot to make a delete goal key so if you  want to delete a goal you will need to write to a file, delete the goal from the file, and then load that file
+
+Commands:
+pressing ';' will allow you to enter commands (these are important)
+make sure to follow the specified format when entering commands as the system is not made to be robust and I have no idea what might happen
+entering a non-integer value when an integer is required will definintly cause the level builder to crash immediatly so don't do that.
+
+zoom [ammount]
+	zooms the screen by adding [ammount] to the screen width/height
+	'zoom default' will return the screen to its default size and position
+
+disp [direction] [lvlname]
+	displays levels/[lvlname] in the direction specified by [direction] (north south east west)
+	display can be cleared using 'disp [direction] none', this doesn't actulat clear anything but instead displays levels/none, which is empty
+
+boarder [on|off]
+	turns the boarder on or off, the boarder us a yellow box that shows where the screen boarders of the level will be when it is played (useful when zoomed out)
+
+scroll [x|y] [distance]
+	scrools the screen the given distance on the specified axis, there is not scroll default so if you want to return to default position and don't remember how much you scrolled use 'zoom default'
+
+write [lvlname]
+	writes the level to levels/[lvlname]
+
+load [lvlname]
+	loads a level from levels/[lvlname] using 'load none' loads an empty level (again, levels/none is a file representing an empty level)
+
+defops [ops]
+	defines spawn options for the default spawn location, make sure you don't accidently set them to an empty string, if you want no ops use 'n'
+
+labels [on|off]
+	turns labels on or off, labels will show what text has been entered for each goal and each level specific spawnpoint

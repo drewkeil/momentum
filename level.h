@@ -12,7 +12,7 @@ class level{
 public:
 
 	//drawn should be an empty vector
-	void get_drawn(std::vector<aabb>& drawn);
+	void get_drawn(std::vector<visibleObject>& drawn);
 
 	void load_level(std::string name, std::string prevName, playerObject& pl);
 
