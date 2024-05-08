@@ -16,7 +16,7 @@ void level::get_drawn(std::vector<visibleObject>& drawn){
 	}
 }
 
-void level::load_level(std::string lvlname, std::string prevName, playerObject& pl){
+void level::load_level(std::string lvlname, const std::string& prevName, playerObject& pl){
 	std::ifstream fin;
 	name=lvlname;
 	lvlname.insert(0,"levels/");

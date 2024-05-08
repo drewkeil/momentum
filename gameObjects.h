@@ -60,4 +60,23 @@ private:
 	int jumpTimer;
 };
 
+class movingPlatform:public aabb{
+	public:
+	movingPlatform(std::istream& is);
+
+	void move();
+
+	private:
+	struct moveInfo{
+		vector2 position;
+		float maxSpeed;
+		float acceleration;
+		uint32_t frameDelay;
+	};
+	std::vector<moveInfo> path;
+	uint32_t delay;
+	uint32_t moveIdx;
+	float velocity;
+};
+
 #endif

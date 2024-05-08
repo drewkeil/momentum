@@ -242,10 +242,6 @@ int main(int argc, char** argv){
 
 		}
 		if(pressed[10]){
-			if(state==goal3)
-				b.goals.pop_back();
-			else if(state==levelSpawn2)
-				b.spawns.pop_back();
 			state=none;
 			str.clear();
 		}
@@ -291,12 +287,12 @@ int main(int argc, char** argv){
 						placingObject.topLeft.y+=placingObject.size.y;
 						placingObject.size.y*=-1;
 					}
-					b.goals.push_back(placingObject);
 				}
 				break;
 			case goal3:
 				if(pressed[8]){
 					b.names.push_back(str);
+					b.goals.push_back(placingObject);
 					str.clear();
 					state=goal1;
 					placingObject.size={15, 5};
@@ -319,13 +315,13 @@ int main(int argc, char** argv){
 			case levelSpawn1:
 				placingObject.topLeft=mousePos;
 				if(pressed[0]){
-					b.spawns.push_back(mousePos);
 					state=levelSpawn2;
 				}
 				break;
 			case levelSpawn2:
 				if(pressed[8]){
 					b.spawnNames.push_back(str);
+					b.spawns.push_back(placingObject.topLeft);
 					str.clear();
 					state=levelSpawn1;
 				}

@@ -14,7 +14,7 @@ public:
 	//drawn should be an empty vector
 	void get_drawn(std::vector<visibleObject>& drawn);
 
-	void load_level(std::string name, std::string prevName, playerObject& pl);
+	void load_level(std::string name, const std::string& prevName, playerObject& pl);
 
 	bool collide_player(playerObject& p);
 

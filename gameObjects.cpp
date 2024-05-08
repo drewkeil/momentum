@@ -10,9 +10,9 @@ aabb::aabb(float x, float y, float width, float height)
 aabb::aabb(){}
 
 bool aabb::colliding(aabb& other){
-	bool vert=!((topLeft.y>(other.topLeft.y+other.size.y))||((topLeft.y+size.y)<other.topLeft.y));
-	bool horz=!((topLeft.x>(other.topLeft.x+other.size.x))||((topLeft.x+size.x)<other.topLeft.x));
-	return horz&&vert;
+	bool vert=((topLeft.y>(other.topLeft.y+other.size.y))||((topLeft.y+size.y)<other.topLeft.y));
+	bool horz=((topLeft.x>(other.topLeft.x+other.size.x))||((topLeft.x+size.x)<other.topLeft.x));
+	return !(horz||vert);
 }
 
 
@@ -156,4 +156,33 @@ playerObject::playerObject(){
 
 void playerObject::show_velocity(std::string& str){
 	str=std::to_string(velocity.x)+", "+std::to_string(velocity.y);
+}
+
+movingPlatform::movingPlatform(std::istream& is)
+	:delay(0), moveIdx(1), velocity(0.f){ // idx is 1 b/c it starts at 0 already
+	//TODO: all of this -._(00-)_.-
+}
+
+void movingPlatform::move(){
+	if(delay>0){
+		--delay;
+		return;
+	}
+	// figure out which direction we're going
+	float xdir=path[moveIdx].position.x-topLeft.x;
+	float ydir=path[moveIdx].position.y-topLeft.y;
+	float mag=sqrt(xdir*xdir+ydir*ydir);
+	xdir/=mag;
+	ydir/=mag;
+	// do moving
+	velocity=std::min(velocity+acceleration, maxSpeed);
+	if(velocity>=mag){
+		topLeft=path[moveIdx].position;
+		moveIdx=(moveIdx+1)%path.size();
+		velocity=0.f;
+		delay=path[moveIdx].frameDelay;
+	}else{
+		topLeft.x+=velocity*xdir;
+		topLeft.y+=velocity*ydir;
+	}
 }
