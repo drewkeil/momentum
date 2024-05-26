@@ -16,18 +16,19 @@ void level::get_drawn(std::vector<visibleObject>& drawn){
 	}
 }
 
-void level::load_level(std::string lvlname, const std::string& prevName, playerObject& pl){
+// I should add versioning info to this so that I don't have to update all old level files whenever
+// something new is added
+void level::load_level(std::string lvlname, playerObject& pl){
 	std::ifstream fin;
-	name=lvlname;
-	lvlname.insert(0,"levels/");
-	fin.open(lvlname);
+	std::string tmp=lvlname;
+	tmp.insert(0,"levels/");
+	fin.open(tmp);
 	if(!fin.is_open()){
-		std::cerr<<"unable to open "<<lvlname<<std::endl;
+		std::cerr<<"unable to open "<<tmp<<std::endl;
 		exit(1);
 	}
 
 	//section 1
-	std::string tmp;
 	std::getline(fin, tmp);
 	while(tmp[0]=='#')
 		std::getline(fin, tmp);
@@ -49,7 +50,7 @@ void level::load_level(std::string lvlname, const std::string& prevName, playerO
 			ops=tmp.substr(opsLoc+1);
 			tmp=tmp.substr(0,opsLoc);
 		}
-		if(tmp==prevName){
+		if(tmp==name){
 			fin>>pl.spawnPoint.x>>pl.spawnPoint.y;
 			found=true;
 		}else
@@ -109,13 +110,13 @@ void level::load_level(std::string lvlname, const std::string& prevName, playerO
 		sp.size.y=5;
 	}
 	fin.close();
+	name=lvlname;
 }
-
 
 bool level::collide_player(playerObject& p){
 	for(size_t i=0;i<goals.size();++i){
 		if(goals[i].colliding(p)){
-			load_level(next[i], name, p);
+			load_level(next[i], p);
 			return true;
 		}
 	}

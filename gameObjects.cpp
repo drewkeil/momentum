@@ -175,7 +175,7 @@ void movingPlatform::move(){
 	xdir/=mag;
 	ydir/=mag;
 	// do moving
-	velocity=std::min(velocity+acceleration, maxSpeed);
+	velocity=std::min(velocity+path[moveIdx].acceleration, path[moveIdx].maxSpeed);
 	if(velocity>=mag){
 		topLeft=path[moveIdx].position;
 		moveIdx=(moveIdx+1)%path.size();

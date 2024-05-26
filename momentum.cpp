@@ -7,6 +7,8 @@
 #include "gameObjects.h"
 #include "level.h"
 
+void render(sf::RenderWindow&, sf::Text&, playerObject&, std::vector<visibleObject>&, bool);
+
 int main(int argc, char** argv){
 	sf::RenderWindow window(sf::VideoMode(640,360),"Momentum");
 	window.setKeyRepeatEnabled(false);
@@ -26,7 +28,7 @@ int main(int argc, char** argv){
 	std::vector<visibleObject> toDraw;
 
 	sf::Font arial;
-	if(!arial.loadFromFile("fonts/arial.ttf")){
+	if(!arial.loadFromFile("fonts/arial.ttf")){ // TODO: use a font I can actualy distribute
 		std::cerr<<"unable to load font"<<std::endl;
 		return 1;
 	}
@@ -37,20 +39,20 @@ int main(int argc, char** argv){
 	text.setPosition(5, 5);
 	bool showSpeed=false;
 
-	if(argc>1){
+	if(argc>1){ // should make a propper actual options processing thing eventualy
 		if(argv[1]==std::string("--building"))
 			building=true;
 		else{
 			if(argv[1]==std::string("--speed")){
 				showSpeed=true;
-				cLevel.load_level(argv[2], "none", player);
+				cLevel.load_level(argv[2], player);
 			}else
-				cLevel.load_level(argv[1], "none", player);
+				cLevel.load_level(argv[1], player);
 			player.respawn();
 			cLevel.get_drawn(toDraw);
 		}
 	}else{
-		cLevel.load_level("lv1", "none", player);
+		cLevel.load_level("lv1", player);
 		cLevel.get_drawn(toDraw);
 	}
 	while(window.isOpen()){
@@ -70,7 +72,7 @@ int main(int argc, char** argv){
 					input|=event.key.code==jump ? 32:0;
 					jumpHeld=jumpHeld||event.key.code==jump;
 					if(building&&event.key.code==sf::Keyboard::Key::L){
-						cLevel.load_level("lvltest", "none", player);
+						cLevel.load_level("lvltest", player);
 						toDraw.clear();
 						cLevel.get_drawn(toDraw);
 					}
@@ -97,32 +99,36 @@ int main(int argc, char** argv){
 				cLevel.get_drawn(toDraw);
 			}
 		}
-		window.clear(sf::Color::White);
-		for(visibleObject obj:toDraw){
-			aabb rect=*obj.object;
+		render(window, text, player, toDraw, showSpeed);
+	}
+}
+
+void render(sf::RenderWindow& window, sf::Text& text, playerObject& player, std::vector<visibleObject>& toDraw, bool showSpeed){
+	window.clear(sf::Color::White);
+	for(visibleObject obj:toDraw){
+		aabb rect=*obj.object;
 			sf::Vertex verticies[5]= {
-				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f)),
-				sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f)),
-				sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y+rect.size.y), obj.color, sf::Vector2f(0.f, 0.f)),
-				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y+rect.size.y), obj.color, sf::Vector2f(0.f, 0.f)),
-				sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f))
-			};
-			window.draw(verticies, 5, sf::LineStrip);
-		}
-		sf::Vertex verticies[5]= {
-			sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f)),
-			sf::Vertex(sf::Vector2f(player.topLeft.x+player.size.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f)),
-			sf::Vertex(sf::Vector2f(player.topLeft.x+player.size.x, player.topLeft.y+player.size.y), player.color, sf::Vector2f(0.f, 0.f)),
-			sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y+player.size.y), player.color, sf::Vector2f(0.f, 0.f)),
-			sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f))
+			sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f)),
+			sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f)),
+			sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y+rect.size.y), obj.color, sf::Vector2f(0.f, 0.f)),
+			sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y+rect.size.y), obj.color, sf::Vector2f(0.f, 0.f)),
+			sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f))
 		};
 		window.draw(verticies, 5, sf::LineStrip);
-		if(showSpeed){
-			std::string str;
-			player.show_velocity(str);
-			text.setString(str);
-			window.draw(text);
-		}
-		window.display();
 	}
+	sf::Vertex verticies[5]= {
+		sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f)),
+		sf::Vertex(sf::Vector2f(player.topLeft.x+player.size.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f)),
+		sf::Vertex(sf::Vector2f(player.topLeft.x+player.size.x, player.topLeft.y+player.size.y), player.color, sf::Vector2f(0.f, 0.f)),
+		sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y+player.size.y), player.color, sf::Vector2f(0.f, 0.f)),
+		sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f))
+	};
+	window.draw(verticies, 5, sf::LineStrip);
+	if(showSpeed){
+		std::string str;
+		player.show_velocity(str);
+		text.setString(str);
+		window.draw(text);
+	}
+	window.display();
 }

@@ -60,6 +60,12 @@ private:
 	int jumpTimer;
 };
 
+//Unsure if I actualy want these in the game. I'd rather have stuff that is fun in this game and
+// not just add every default platformer feature just because if it doesent have interesting 
+// interactions with the main mechanic.
+//I'll have to play around with the ones implemented in the origional java version to see how
+// fun/necessary moving platforms are for this game and how well they interact with the main
+// mechanic.
 class movingPlatform:public aabb{
 	public:
 	movingPlatform(std::istream& is);
@@ -77,6 +83,15 @@ class movingPlatform:public aabb{
 	uint32_t delay;
 	uint32_t moveIdx;
 	float velocity;
+	bool started; // need some way to set and check start moving conditions
+};
+
+struct camData{
+	aabb bounds;
+	vector2 size;
+	vector2 offset;
+	float moveAmount;
+	float zoomSpeed;
 };
 
 #endif

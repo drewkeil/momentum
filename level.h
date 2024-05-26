@@ -14,13 +14,15 @@ public:
 	//drawn should be an empty vector
 	void get_drawn(std::vector<visibleObject>& drawn);
 
-	void load_level(std::string name, const std::string& prevName, playerObject& pl);
+	void load_level(std::string name, playerObject& pl);
 
 	bool collide_player(playerObject& p);
 
 private:
 	std::vector<aabb> platforms;
 	std::vector<aabb> spikes;
+	std::vector<aabb> camTriggers;
+	std::vector<camData> camInfo;
 	std::vector<std::string> next;
 	float deathHeight;
 	std::vector<aabb> goals;
