@@ -39,6 +39,7 @@ public:
 
 private:
 	sf::RenderWindow window;
+	sf::View view;
 	sf::Clock clock;
 	float timer=0.f;
 	level cLevel;
@@ -99,6 +100,7 @@ private:
 			cLevel.get_drawn(toDraw);
 			// set player camera to match default
 		}
+		player.update_camera(view);
 	}
 
 	void draw(const visibleObject& obj){
@@ -114,6 +116,7 @@ private:
 	}
 
 	void render(){
+		window.setView(view);
 		window.clear(sf::Color::White);
 		for(visibleObject& obj:toDraw){
 			draw(obj);

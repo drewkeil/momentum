@@ -58,6 +58,8 @@ public:
 
 	void show_velocity(std::string& str);
 
+	void update_camera(sf::View& view);
+
 private:
 	
 	vector2 velocity;

@@ -158,6 +158,25 @@ void playerObject::show_velocity(std::string& str){
 	str=std::to_string(velocity.x)+", "+std::to_string(velocity.y);
 }
 
+void playerObject::update_camera(sf::View& view){
+	view.setSize(camera.size.x,camera.size.y);
+	sf::Vector2f tmp=view.getCenter();
+	tmp=sf::Vector2f(topLeft.x-tmp.x+PLAYER_WIDTH/2, topLeft.y-tmp.y+PLAYER_HEIGHT/2);
+	tmp=sf::Vector2f(tmp.x+camera.offset.x, tmp.y+camera.offset.y);
+	tmp=sf::Vector2f(tmp.x*camera.moveAmount, tmp.y*camera.moveAmount);
+	view.move(tmp);
+	tmp=view.getCenter();
+	float dist=camera.bounds.topLeft.x+camera.bounds.size.x-(tmp.x+camera.size.x/2);
+	if(dist<0)
+		view.move(dist, 0);
+	else if((dist=camera.bounds.topLeft.x-(tmp.x-camera.size.x/2))>0)
+		view.move(dist, 0);
+	if((dist=camera.bounds.topLeft.y+camera.bounds.size.y-(tmp.y+camera.size.y/2))<0)
+		view.move(0, dist);
+	else if((dist=camera.bounds.topLeft.y-(tmp.y-camera.size.y/2))>0)
+		view.move(0, dist);
+}
+
 movingPlatform::movingPlatform(std::istream& is)
 	:delay(0), moveIdx(1), velocity(0.f){ // idx is 1 b/c it starts at 0 already
 	//TODO: all of this -._(00-)_.-
