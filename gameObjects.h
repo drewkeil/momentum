@@ -27,6 +27,14 @@ struct visibleObject{
 	sf::Color color; // this will be replaced with sprite/texture stuff later
 };
 
+struct camData{
+	aabb bounds;
+	vector2 size; // width, height
+	vector2 offset; // from center of player
+	float moveAmount; // fraction of distance to player per frame
+	//float zoomSpeed; // speed at which to zoom in/out if needed (not implemented)
+};
+
 #define PLAYER_HEIGHT 20
 #define PLAYER_WIDTH 10
 class playerObject:public aabb{
@@ -34,6 +42,7 @@ class playerObject:public aabb{
 public:
 	vector2 spawnPoint;
 	sf::Color color;
+	camData camera;
 
 	playerObject();
 
@@ -60,12 +69,14 @@ private:
 	int jumpTimer;
 };
 
-//Unsure if I actualy want these in the game. I'd rather have stuff that is fun in this game and
-// not just add every default platformer feature just because if it doesent have interesting 
+//Unsure if I actualy want these in the game. I'd rather have
+// stuff that is fun in this game and not just add every default
+// platformer feature just because if it doesent have interesting 
 // interactions with the main mechanic.
-//I'll have to play around with the ones implemented in the origional java version to see how
-// fun/necessary moving platforms are for this game and how well they interact with the main
-// mechanic.
+//I'll have to play around with the ones implemented in the
+// origional java version to see how fun/necessary moving
+// platforms are for this game and how well they interact
+// with the main mechanic.
 class movingPlatform:public aabb{
 	public:
 	movingPlatform(std::istream& is);
@@ -84,14 +95,6 @@ class movingPlatform:public aabb{
 	uint32_t moveIdx;
 	float velocity;
 	bool started; // need some way to set and check start moving conditions
-};
-
-struct camData{
-	aabb bounds;
-	vector2 size;
-	vector2 offset;
-	float moveAmount;
-	float zoomSpeed;
 };
 
 #endif

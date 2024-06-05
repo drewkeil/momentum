@@ -3,15 +3,42 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <cstdlib>
 
-#include "gameObjects.h"
+#include "gameobjects.h"
 #include "level.h"
 
-void render(sf::RenderWindow&, sf::Text&, playerObject&, std::vector<visibleObject>&, bool);
+class game{
+public:
+	game(): window(sf::VideoMode(640,360),"momentum"){
+		window.setKeyRepeatEnabled(false);
+		sf::Font font;
+		if(!font.loadFromFile("fonts/OpenSans-Regular.ttf")){ // probably replace with different/custom font (also make sure i'm doing the distribution thing right)
+			std::cerr<<"unable to load font"<<std::endl;
+			exit(1);
+		}
+		text.setFont(font);
+		text.setCharacterSize(15);
+		text.setFillColor(sf::Color::Black);
+		text.setPosition(5, 5);
+		cLevel.load_level("test1", player); // I will add a main menu thingy soon
+		cLevel.get_drawn(toDraw);
+	}
 
-int main(int argc, char** argv){
-	sf::RenderWindow window(sf::VideoMode(640,360),"Momentum");
-	window.setKeyRepeatEnabled(false);
+	void run_game(){
+		while(window.isOpen()){
+			timer+=clock.restart().asSeconds();
+			poll_events();
+			if(timer>=0.015625f){
+				timer=0;
+				update();
+			}
+			render();
+		}
+	}
+
+private:
+	sf::RenderWindow window;
 	sf::Clock clock;
 	float timer=0.f;
 	level cLevel;
@@ -19,44 +46,17 @@ int main(int argc, char** argv){
 	uint8_t input=0;
 	bool jumpHeld=false;
 	bool building=false;
+	bool showSpeed=false;
 	sf::Keyboard::Key up=sf::Keyboard::Key::W;
 	sf::Keyboard::Key down=sf::Keyboard::Key::S;
 	sf::Keyboard::Key left=sf::Keyboard::Key::A;
 	sf::Keyboard::Key right=sf::Keyboard::Key::D;
 	sf::Keyboard::Key shift=sf::Keyboard::Key::LShift;
 	sf::Keyboard::Key jump=sf::Keyboard::Key::Space;
-	std::vector<visibleObject> toDraw;
-
-	sf::Font arial;
-	if(!arial.loadFromFile("fonts/arial.ttf")){ // TODO: use a font I can actualy distribute
-		std::cerr<<"unable to load font"<<std::endl;
-		return 1;
-	}
+	std::vector<visibleObject> toDraw;	
 	sf::Text text;
-	text.setFont(arial);
-	text.setCharacterSize(15);
-	text.setFillColor(sf::Color::Black);
-	text.setPosition(5, 5);
-	bool showSpeed=false;
 
-	if(argc>1){ // should make a propper actual options processing thing eventualy
-		if(argv[1]==std::string("--building"))
-			building=true;
-		else{
-			if(argv[1]==std::string("--speed")){
-				showSpeed=true;
-				cLevel.load_level(argv[2], player);
-			}else
-				cLevel.load_level(argv[1], player);
-			player.respawn();
-			cLevel.get_drawn(toDraw);
-		}
-	}else{
-		cLevel.load_level("lv1", player);
-		cLevel.get_drawn(toDraw);
-	}
-	while(window.isOpen()){
-		timer+=clock.restart().asSeconds();
+	void poll_events(){
 		sf::Event event;
 		while(window.pollEvent(event)){
 			switch(event.type){
@@ -87,27 +87,23 @@ int main(int argc, char** argv){
 				default:
 					break;
 			}
-
 		}
-		if(timer>=0.015625f){
-			timer=0;
-			player.process_input(input, jumpHeld);
-			input&=207;
-			player.update();
-			if(cLevel.collide_player(player)){
-				toDraw.clear();
-				cLevel.get_drawn(toDraw);
-			}
-		}
-		render(window, text, player, toDraw, showSpeed);
 	}
-}
 
-void render(sf::RenderWindow& window, sf::Text& text, playerObject& player, std::vector<visibleObject>& toDraw, bool showSpeed){
-	window.clear(sf::Color::White);
-	for(visibleObject obj:toDraw){
-		aabb rect=*obj.object;
-			sf::Vertex verticies[5]= {
+	void update(){
+		player.process_input(input, jumpHeld);
+		input&=207;
+		player.update();
+		if(cLevel.collide_player(player)){
+			toDraw.clear();
+			cLevel.get_drawn(toDraw);
+			// set player camera to match default
+		}
+	}
+
+	void draw(const visibleObject& obj){
+		aabb& rect=*obj.object;
+		sf::Vertex verticies[5]= {
 			sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f)),
 			sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f)),
 			sf::Vertex(sf::Vector2f(rect.topLeft.x+rect.size.x, rect.topLeft.y+rect.size.y), obj.color, sf::Vector2f(0.f, 0.f)),
@@ -116,19 +112,24 @@ void render(sf::RenderWindow& window, sf::Text& text, playerObject& player, std:
 		};
 		window.draw(verticies, 5, sf::LineStrip);
 	}
-	sf::Vertex verticies[5]= {
-		sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f)),
-		sf::Vertex(sf::Vector2f(player.topLeft.x+player.size.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f)),
-		sf::Vertex(sf::Vector2f(player.topLeft.x+player.size.x, player.topLeft.y+player.size.y), player.color, sf::Vector2f(0.f, 0.f)),
-		sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y+player.size.y), player.color, sf::Vector2f(0.f, 0.f)),
-		sf::Vertex(sf::Vector2f(player.topLeft.x, player.topLeft.y), player.color, sf::Vector2f(0.f, 0.f))
-	};
-	window.draw(verticies, 5, sf::LineStrip);
-	if(showSpeed){
-		std::string str;
-		player.show_velocity(str);
-		text.setString(str);
-		window.draw(text);
+
+	void render(){
+		window.clear(sf::Color::White);
+		for(visibleObject& obj:toDraw){
+			draw(obj);
+		}
+		draw({&player, player.color});
+		if(showSpeed){
+			std::string str;
+			player.show_velocity(str);
+			text.setString(str);
+			window.draw(text);
+		}
+		window.display();
 	}
-	window.display();
+};
+
+int main(int argc, char** argv){
+	game momentum;
+	momentum.run_game();
 }

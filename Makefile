@@ -22,7 +22,7 @@ build: lvlBuild.exe momentum.exe
 
 obj/%.o: %.cpp
 	mkdir -p obj
-	$(CXX) $(C++FLAGS)  -c $< -o $@ $(INC)
+	$(CXX) $(C++FLAGS) $(INC) -c $< -o $@
 
 momentum_s.exe: obj/momentum.o obj/gameObjects.o obj/level.o
 	$(CXX) -O2 -static $^ -o momentum_s $(LIBS)

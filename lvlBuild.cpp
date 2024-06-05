@@ -107,6 +107,7 @@ void load_build(std::string lvlname, build& b){
 		sp.size.y=5;
 		sp.color=sf::Color::Red;
 	}
+	// TODO: add the same thingy from the actual lvl loader so it can precess new stuff without all files needing to be updated
 	fin.close();
 }
 
@@ -180,13 +181,13 @@ int main(int argc, char** argv){
 	build staticWest;
 	vector2 mousePos;
 	std::string str;
-	sf::Font arial;
-	if(!arial.loadFromFile("fonts/arial.ttf")){
+	sf::Font font;
+	if(!arial.loadFromFile("fonts/OpenSans-Regular.ttf")){
 		std::cerr<<"unable to load font"<<std::endl;
 		return 1;
 	}
 	sf::Text text;
-	text.setFont(arial);
+	text.setFont(font);
 	text.setCharacterSize(15);
 	text.setFillColor(sf::Color::Black);
 	sf::View view=window.getDefaultView();

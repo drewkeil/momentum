@@ -16,9 +16,13 @@ void level::get_drawn(std::vector<visibleObject>& drawn){
 	}
 }
 
-// I should add versioning info to this so that I don't have to update all old level files whenever
-// something new is added
+// I should add versioning info to this so that I don't have to update all old level
+// files whenever something new is added
 void level::load_level(std::string lvlname, playerObject& pl){
+	// clear stuff that might not be included in the file so it doesn't cause problems
+	camTriggers.clear();
+	camInfo.clear();
+
 	std::ifstream fin;
 	std::string tmp=lvlname;
 	tmp.insert(0,"levels/");
@@ -109,6 +113,26 @@ void level::load_level(std::string lvlname, playerObject& pl){
 		sp.size.x=5;
 		sp.size.y=5;
 	}
+
+	//section 5
+	std::getline(fin, tmp);
+	while(tmp[0]=='#'||tmp[0]=='\0'){
+		if(!std::getline(fin, tmp)){
+			fin.close();
+			name=lvlname;
+			return;
+		}
+	}
+	p=std::stoi(tmp);
+	camTriggers.resize(p);
+	camInfo.resize(p);
+	for(int i=0;i<p;++i){
+		aabb& trg=camTriggers[i];
+		fin>>trg.topLeft.x>>trg.topLeft.y>>trg.size.x>>trg.size.y;
+		camData& cam=camInfo[i];
+		fin>>cam.bounds.topLeft.x>>cam.bounds.topLeft.y>>cam.bounds.size.x>>cam.bounds.size.y;
+		fin>>cam.size.x>>cam.size.y>>cam.offset.x>>cam.offset.y>>cam.moveAmount;
+	}
 	fin.close();
 	name=lvlname;
 }
@@ -132,6 +156,10 @@ bool level::collide_player(playerObject& p){
 		if(platform.colliding(p)){
 			p.collide(platform);
 		}
+	}
+	for(size_t i=0;i<camTriggers.size();++i){
+		if(camTriggers[i].colliding(p))
+			p.camera=camInfo[i];
 	}
 	return false;
 }
