@@ -21,6 +21,7 @@ public:
 		text.setCharacterSize(15);
 		text.setFillColor(sf::Color::Black);
 		text.setPosition(5, 5);
+		player.camera={{0,0,640,360},640,360,0,0,0};
 		cLevel.load_level("test1", player); // I will add a main menu thingy soon
 		cLevel.get_drawn(toDraw);
 	}
@@ -76,6 +77,7 @@ private:
 						cLevel.load_level("lvltest", player);
 						toDraw.clear();
 						cLevel.get_drawn(toDraw);
+						player.camera={{0,0,640,360},640,360,0,0,0};
 					}
 					break;
 				case sf::Event::KeyReleased:

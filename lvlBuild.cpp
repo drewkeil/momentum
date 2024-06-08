@@ -182,7 +182,7 @@ int main(int argc, char** argv){
 	vector2 mousePos;
 	std::string str;
 	sf::Font font;
-	if(!arial.loadFromFile("fonts/OpenSans-Regular.ttf")){
+	if(!font.loadFromFile("fonts/OpenSans-Regular.ttf")){
 		std::cerr<<"unable to load font"<<std::endl;
 		return 1;
 	}

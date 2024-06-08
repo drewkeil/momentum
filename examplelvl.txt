@@ -27,4 +27,14 @@ lv2
 20 200
 40 40
 600 340
+#optional list of camera triggers
+# first number of camera triggers
+# then for each one trigger topleft and size
+# followed by the bounds of the camera area (topleft and size)
+# next cam size, center offset from player, finally the move amount
+2
+625 325 10 10
+0 -100 700 500 640 360 10 0 0.5
+50 0 10 10
+0 -100 700 500 640 360 10 0 0.5
 # end of level file
