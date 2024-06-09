@@ -26,19 +26,33 @@ public:
 		cLevel.get_drawn(toDraw);
 	}
 
-	void run_game(){
+	void run_game(){	// this is why people make game engines
 		while(window.isOpen()){
 			timer+=clock.restart().asSeconds();
 			poll_events();
-			if(timer>=0.015625f){
-				timer=0;
-				update();
+			switch(state){
+				case gamestate::menu:
+					menu_update();
+					menu_render();
+					break;
+				case gamestate::playing:
+					if(timer>=0.015625f){
+						timer=0;
+						playing_update();
+					}
+					playing_render();
+					break;
+				case gamestate::paused:
+					paused_update();
+					paused_render();
+					break;
 			}
-			render();
 		}
 	}
 
 private:
+	enum class:uint8_t gamestate {menu, playing, paused};
+
 	sf::RenderWindow window;
 	sf::View view;
 	sf::Clock clock;
@@ -55,8 +69,10 @@ private:
 	sf::Keyboard::Key right=sf::Keyboard::Key::D;
 	sf::Keyboard::Key shift=sf::Keyboard::Key::LShift;
 	sf::Keyboard::Key jump=sf::Keyboard::Key::Space;
+	sf::Keyboard::key pressed;
 	std::vector<visibleObject> toDraw;	
 	sf::Text text;
+	gamestate state=gamestate::menu;
 
 	void poll_events(){
 		sf::Event event;
@@ -93,14 +109,14 @@ private:
 		}
 	}
 
-	void update(){
+	void playing_update(){
 		player.process_input(input, jumpHeld);
 		input&=207;
 		player.update();
 		if(cLevel.collide_player(player)){
 			toDraw.clear();
 			cLevel.get_drawn(toDraw);
-			// set player camera to match default
+			player.camera={{0,0,640,360},640,360,0,0,0};
 		}
 		player.update_camera(view);
 	}
@@ -117,7 +133,7 @@ private:
 		window.draw(verticies, 5, sf::LineStrip);
 	}
 
-	void render(){
+	void playing_render(){
 		window.setView(view);
 		window.clear(sf::Color::White);
 		for(visibleObject& obj:toDraw){
