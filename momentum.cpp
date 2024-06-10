@@ -63,13 +63,7 @@ private:
 	bool jumpHeld=false;
 	bool building=false;
 	bool showSpeed=false;
-	sf::Keyboard::Key up=sf::Keyboard::Key::W;
-	sf::Keyboard::Key down=sf::Keyboard::Key::S;
-	sf::Keyboard::Key left=sf::Keyboard::Key::A;
-	sf::Keyboard::Key right=sf::Keyboard::Key::D;
-	sf::Keyboard::Key shift=sf::Keyboard::Key::LShift;
-	sf::Keyboard::Key jump=sf::Keyboard::Key::Space;
-	sf::Keyboard::key pressed;
+	sf::Keyboard::Key buttons[7]={sf::Keyboard::Key::W, sf::Keyboard::Key::S, sf::Keyboard::Key::A, sf::Keyboard::Key::D, sf::Keyboard::Key::LShift, sf::Keyboard::Key::Space, sf::Keyboard::key pressed};
 	std::vector<visibleObject> toDraw;	
 	sf::Text text;
 	gamestate state=gamestate::menu;
@@ -82,14 +76,14 @@ private:
 					window.close();
 					break;
 				case sf::Event::KeyPressed:
-					input|=event.key.code==up ? 1:0;
-					input|=event.key.code==down ? 2:0;
-					input|=event.key.code==left ? 4:0;
-					input|=event.key.code==right ? 8:0;
-					input|=event.key.code==shift ? 16:0;
-					input|=event.key.code==jump ? 32:0;
-					jumpHeld=jumpHeld||event.key.code==jump;
-					if(building&&event.key.code==sf::Keyboard::Key::L){
+					input|=event.key.code==buttons[0] ? 1:0; //up
+					input|=event.key.code==buttons[1] ? 2:0; //down
+					input|=event.key.code==buttons[2] ? 4:0; //left
+					input|=event.key.code==buttons[3] ? 8:0; //right
+					input|=event.key.code==buttons[4] ? 16:0; //shift
+					input|=event.key.code==buttons[5] ? 32:0; //jump
+					jumpHeld=jumpHeld||event.key.code==buttons[5];
+					if(building&&event.key.code==sf::Keyboard::Key::L){ //probably delete this
 						cLevel.load_level("lvltest", player);
 						toDraw.clear();
 						cLevel.get_drawn(toDraw);
@@ -97,11 +91,11 @@ private:
 					}
 					break;
 				case sf::Event::KeyReleased:
-					input^=event.key.code==up ? 1:0;
-					input^=event.key.code==down ? 2:0;
-					input^=event.key.code==left ? 4:0;
-					input^=event.key.code==right ? 8:0;
-					jumpHeld=!(event.key.code==jump);
+					input^=event.key.code==buttons[0] ? 1:0;
+					input^=event.key.code==buttons[1] ? 2:0;
+					input^=event.key.code==buttons[2] ? 4:0;
+					input^=event.key.code==buttons[3] ? 8:0;
+					jumpHeld=!(event.key.code==buttons[5]);
 					break;
 				default:
 					break;
