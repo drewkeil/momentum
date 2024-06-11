@@ -7,12 +7,12 @@
 
 #include "gameobjects.h"
 #include "level.h"
+#include "gameMenu.h"
 
 class game{
 public:
 	game(): window(sf::VideoMode(640,360),"momentum"){
 		window.setKeyRepeatEnabled(false);
-		sf::Font font;
 		if(!font.loadFromFile("fonts/OpenSans-Regular.ttf")){ // probably replace with different/custom font (also make sure i'm doing the distribution thing right)
 			std::cerr<<"unable to load font"<<std::endl;
 			exit(1);
@@ -20,10 +20,7 @@ public:
 		text.setFont(font);
 		text.setCharacterSize(15);
 		text.setFillColor(sf::Color::Black);
-		text.setPosition(5, 5);
 		player.camera={{0,0,640,360},640,360,0,0,0};
-		cLevel.load_level("test1", player); // I will add a main menu thingy soon
-		cLevel.get_drawn(toDraw);
 	}
 
 	void run_game(){	// this is why people make game engines
@@ -51,7 +48,7 @@ public:
 	}
 
 private:
-	enum class:uint8_t gamestate {menu, playing, paused};
+	enum class gamestate:uint8_t {menu, playing, paused};
 
 	sf::RenderWindow window;
 	sf::View view;
@@ -59,13 +56,15 @@ private:
 	float timer=0.f;
 	level cLevel;
 	playerObject player;
+	gameMenu menu;
 	uint8_t input=0;
 	bool jumpHeld=false;
 	bool building=false;
 	bool showSpeed=false;
-	sf::Keyboard::Key buttons[7]={sf::Keyboard::Key::W, sf::Keyboard::Key::S, sf::Keyboard::Key::A, sf::Keyboard::Key::D, sf::Keyboard::Key::LShift, sf::Keyboard::Key::Space, sf::Keyboard::key pressed};
+	sf::Keyboard::Key buttons[7]={sf::Keyboard::Key::W, sf::Keyboard::Key::S, sf::Keyboard::Key::A, sf::Keyboard::Key::D, sf::Keyboard::Key::LShift, sf::Keyboard::Key::Space};
 	std::vector<visibleObject> toDraw;	
 	sf::Text text;
+	sf::Font font;
 	gamestate state=gamestate::menu;
 
 	void poll_events(){
@@ -91,11 +90,13 @@ private:
 					}
 					break;
 				case sf::Event::KeyReleased:
-					input^=event.key.code==buttons[0] ? 1:0;
-					input^=event.key.code==buttons[1] ? 2:0;
-					input^=event.key.code==buttons[2] ? 4:0;
-					input^=event.key.code==buttons[3] ? 8:0;
-					jumpHeld=!(event.key.code==buttons[5]);
+					if(state==gamestate::playing){
+						input^=event.key.code==buttons[0] ? 1:0;
+						input^=event.key.code==buttons[1] ? 2:0;
+						input^=event.key.code==buttons[2] ? 4:0;
+						input^=event.key.code==buttons[3] ? 8:0;
+						jumpHeld=!(event.key.code==buttons[5]);
+					}
 					break;
 				default:
 					break;
@@ -115,7 +116,18 @@ private:
 		player.update_camera(view);
 	}
 
-	void draw(const visibleObject& obj){
+	void menu_update(){
+		if(menu.update(input, cLevel, player, buttons)){
+			state=gamestate::playing;
+			cLevel.get_drawn(toDraw);
+		}
+		input=0;
+	}
+
+	void paused_update(){
+	}
+
+	void draw(const visibleObject& obj){ // good chance i delete this after changing the game to use actual sprites
 		aabb& rect=*obj.object;
 		sf::Vertex verticies[5]= {
 			sf::Vertex(sf::Vector2f(rect.topLeft.x, rect.topLeft.y), obj.color, sf::Vector2f(0.f, 0.f)),
@@ -137,11 +149,33 @@ private:
 		if(showSpeed){
 			std::string str;
 			player.show_velocity(str);
+			text.setPosition(5, 5);
 			text.setString(str);
 			window.draw(text);
 		}
 		window.display();
 	}
+
+	void menu_render(){
+		window.clear(sf::Color::White);
+		std::vector<std::string> contents;
+		menu.get_contents(contents);
+		for(size_t i=0;i<contents.size();++i){
+			text.setString(contents[i]);
+			text.setPosition(50, 20*i+15);
+			window.draw(text);
+		}
+		window.display();
+	}
+
+	void paused_render(){
+		window.clear(sf::Color::White);
+		text.setPosition(20, 20);
+		text.setString("How did you get here?");
+		window.draw(text);
+		window.display();
+	}
+
 };
 
 int main(int argc, char** argv){

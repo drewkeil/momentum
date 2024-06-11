@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <cstdlib>
 
 void level::get_drawn(std::vector<visibleObject>& drawn){
 	drawn.resize(platforms.size()+spikes.size());

@@ -24,10 +24,10 @@ obj/%.o: %.cpp
 	mkdir -p obj
 	$(CXX) $(C++FLAGS) $(INC) -c $< -o $@
 
-momentum_s.exe: obj/momentum.o obj/gameObjects.o obj/level.o
+momentum_s.exe: obj/momentum.o obj/gameObjects.o obj/level.o obj/gameMenu.o
 	$(CXX) -O2 -static $^ -o momentum_s $(LIBS)
 
-momentum.exe: obj/momentum.o obj/gameObjects.o obj/level.o
+momentum.exe: obj/momentum.o obj/gameObjects.o obj/level.o obj/gameMenu.o
 	$(CXX) -O2 $^ -o momentum $(LIBS)
 
 lvlBuild.exe: obj/gameObjects.o obj/level.o obj/lvlBuild.o
