@@ -19,6 +19,8 @@ struct build{
 	std::vector<std::string> names;
 	std::vector<vector2> spawns;
 	std::vector<std::string> spawnNames;
+	std::vector<camData> cameras;
+	std::vector<dispObject> camTriggers;
 	vector2 defaultSpawn;
 	std::string defaultOps;
 	float deathHeight;
@@ -41,6 +43,14 @@ void print_build(std::ostream& os, build& b){
 		os<<rect.topLeft.x<<' '<<rect.topLeft.y<<' '<<rect.size.x<<' '<<rect.size.y<<'\n';
 	for(dispObject& rect:b.spikes)
 		os<<rect.topLeft.x<<' '<<rect.topLeft.y<<'\n';
+	os<<"#camera triggers and settings\n"<<b.cameras.size()<<'\n';
+	for(size_t i=0;i<b.cameras.size();++i){
+		dispObject& rect=b.camTriggers[i];
+		os<<rect.topLeft.x<<' '<<rect.topLeft.y<<' '<<rect.size.x<<' '<<rect.size.y<<'\n';
+		camData& cam=b.cameras[i];
+		os<<cam.bounds.topLeft.x<<' '<<cam.bounds.topLeft.y<<' '<<cam.bounds.size.x<<' '<<cam.bounds.size.y<<'\n';
+		os<<cam.size.x<<' '<<cam.size.y<<' '<<cam.offset.x<<' '<<cam.offset.y<<' '<<cam.moveAmount<<'\n';
+	}
 }
 
 void load_build(std::string lvlname, build& b){
@@ -49,8 +59,11 @@ void load_build(std::string lvlname, build& b){
 	fin.open(lvlname);
 	if(!fin.is_open()){
 		std::cerr<<"unable to open "<<lvlname<<std::endl;
-		exit(1);
+		fin.close();
+		return;
 	}
+	b.cameras.clear();
+	b.camTriggers.clear();
 
 	//section 1
 	std::string tmp;
@@ -107,7 +120,26 @@ void load_build(std::string lvlname, build& b){
 		sp.size.y=5;
 		sp.color=sf::Color::Red;
 	}
-	// TODO: add the same thingy from the actual lvl loader so it can precess new stuff without all files needing to be updated
+
+	// section 5
+	std::getline(fin, tmp);
+	while(tmp[0]=='#'||tmp[0]=='\0'){
+		if(!std::getline(fin, tmp)){
+			fin.close();
+			return;
+		}
+	}
+	p=std::stoi(tmp);
+	b.camTriggers.resize(p);
+	b.cameras.resize(p);
+	for(int i=0;i<p;++i){
+		dispObject& trg=b.camTriggers[i];
+		fin>>trg.topLeft.x>>trg.topLeft.y>>trg.size.x>>trg.size.y;
+		trg.color=sf::Color(210, 190, 100);
+		camData& cam=b.cameras[i];
+		fin>>cam.bounds.topLeft.x>>cam.bounds.topLeft.y>>cam.bounds.size.x>>cam.bounds.size.y;
+		fin>>cam.size.x>>cam.size.y>>cam.offset.x>>cam.offset.y>>cam.moveAmount;
+	}
 	fin.close();
 }
 
@@ -124,6 +156,10 @@ std::vector<dispObject> get_drawn(build& b){
 	for(size_t i=0;i<b.spawns.size();++i){
 		dispObject tmp{{b.spawns[i].x, b.spawns[i].y}, {PLAYER_WIDTH, PLAYER_HEIGHT}, sf::Color(200, 200, 255)};
 		drawn.push_back(tmp);
+	}
+	for(size_t i=0;i<b.cameras.size();++i){
+		drawn.push_back({b.cameras[i].bounds.topLeft, b.cameras[i].bounds.size, sf::Color(180, 160, 70)});
+		drawn.push_back(b.camTriggers[i]);
 	}
 	dispObject player;
 	player.color=sf::Color::Black;
@@ -158,8 +194,10 @@ void static_add_drawn(build& b, std::vector<dispObject>& drawn, float xOffset, f
 	}
 }
 
-enum Mode {none, box1, box2, spike, player, goal1, goal2, goal3, command, levelSpawn1, levelSpawn2, del};
-std::string modes[12]={"none", "box1", "box2", "spike", "player", "goal1", "goal2", "goal3: ", "command: ","levelSpawn1", "levelSpawn2: ", "delete"};
+enum Mode {none, box1, box2, spike, player, goal1, goal2, goal3, command, levelSpawn1, levelSpawn2, del, camtrig1, camtrig2,
+	cambound1=14, cambound2=15, camwidth=16, camheight=17, camxoffset=18, camyoffset=19, camspeed=20};
+std::string modes[]={"none", "box1", "box2", "spike", "player", "goal1", "goal2", "goal destination: ", "command: ", "levelSpawn1", "spawn entry level: ", "delete", "camtrig1", "camtrig2",
+	"cambound1", "cambound2", "cam width: ", "cam height: ", "cam x offset: ", "cam y offset: ", "cam follow rate [0-1]:"};
 
 int main(int argc, char** argv){
 	//  steps for test play:
@@ -195,13 +233,13 @@ int main(int argc, char** argv){
 		load_build(argv[1], b);
 		toDraw=get_drawn(b);
 	}
-	// mousePressed, box, spike, player, delete, write, goal, command, enter, level spawn, escape
-	bool pressed[11]={};
+	// mousePressed, box, spike, player, delete, write, goal, command, enter, level spawn, escape, camera
+	bool pressed[12]={};
 	bool boarder=true;
 	bool labels=false;
 	while(window.isOpen()){
 		sf::Event event;
-		for(int i=0;i<11;++i)
+		for(int i=0;i<12;++i)
 			pressed[i]=false;
 		while(window.pollEvent(event)){
 			switch(event.type){
@@ -219,6 +257,7 @@ int main(int argc, char** argv){
 					pressed[8]=event.key.code==sf::Keyboard::Key::Enter;
 					pressed[9]=event.key.code==sf::Keyboard::Key::L;
 					pressed[10]=event.key.code==sf::Keyboard::Key::Escape;
+					pressed[11]=event.key.code==sf::Keyboard::Key::C;
 					break;
 				case sf::Event::MouseMoved:{
 					sf::Vector2i mpos(event.mouseMove.x, event.mouseMove.y);
@@ -230,7 +269,7 @@ int main(int argc, char** argv){
 					pressed[0]=true;
 					break;
 				case sf::Event::TextEntered:
-					if((state==command || state==goal3 || state==levelSpawn2) && !pressed[8]){
+					if((state==command || state==goal3 || state==levelSpawn2 || (state>15 && state<21)) && !pressed[8]){
 						if (event.text.unicode<128&&event.text.unicode!='\b')
 							str+=(char)event.text.unicode;
 						if(event.text.unicode=='\b'&&!str.empty())
@@ -245,6 +284,10 @@ int main(int argc, char** argv){
 		if(pressed[10]){
 			state=none;
 			str.clear();
+			if(state>13&&state<21){
+				b.cameras.pop_back();
+				b.camTriggers.pop_back();
+			}
 		}
 		switch(state){
 			case box1:
@@ -391,6 +434,11 @@ int main(int argc, char** argv){
 							labels=true;
 						if(str=="off")
 							labels=false;
+					}else if(tmp=="start"){
+						std::ofstream fout;
+						fout.open("levels/startpoints", std::ios_base::app);
+						fout<<str<<'\n';
+						fout.close();
 					}
 					str.clear();
 					state=none;
@@ -438,6 +486,86 @@ int main(int argc, char** argv){
 				}
 				break;
 			}
+			case camtrig1:
+				placingObject.topLeft=mousePos;
+				if(pressed[0])
+					state=camtrig2;
+				break;
+			case camtrig2:
+				placingObject.size.x=mousePos.x-placingObject.topLeft.x;
+				placingObject.size.y=mousePos.y-placingObject.topLeft.y;
+				if(pressed[0]){
+					state=cambound1;
+					if(placingObject.size.x<0){
+						placingObject.topLeft.x+=placingObject.size.x;
+						placingObject.size.x*=-1;
+					}
+					if(placingObject.size.y<0){
+						placingObject.topLeft.y+=placingObject.size.y;
+						placingObject.size.y*=-1;
+					}
+					b.camTriggers.push_back(placingObject);
+					b.cameras.push_back({{0, 0, 0, 0}, {0,0},{0,0},0}); // to make exiting early work
+					placingObject.size={15, 5};
+					placingObject.color=sf::Color(180, 160, 70);
+				}
+				break;
+			case cambound1:
+				placingObject.topLeft=mousePos;
+				if(pressed[0])
+					state=cambound2;
+				break;
+			case cambound2:
+				placingObject.size.x=mousePos.x-placingObject.topLeft.x;
+				placingObject.size.y=mousePos.y-placingObject.topLeft.y;
+				if(pressed[0]){
+					state=camwidth;
+					if(placingObject.size.x<0){
+						placingObject.topLeft.x+=placingObject.size.x;
+						placingObject.size.x*=-1;
+					}
+					if(placingObject.size.y<0){
+						placingObject.topLeft.y+=placingObject.size.y;
+						placingObject.size.y*=-1;
+					}
+					b.cameras.back().bounds=aabb(placingObject.topLeft.x, placingObject.topLeft.y, placingObject.size.x, placingObject.size.y);
+				}
+				break;
+			case camwidth:
+				if(pressed[8]){
+					b.cameras.back().size.x=stoi(str);
+					str.clear();
+					state=camheight;
+				}
+				break;
+			case camheight:
+				if(pressed[8]){
+					b.cameras.back().size.y=stoi(str);
+					str.clear();
+					state=camxoffset;
+				}
+				break;
+			case camxoffset:
+				if(pressed[8]){
+					b.cameras.back().offset.x=stoi(str);
+					str.clear();
+					state=camyoffset;
+				}
+				break;
+			case camyoffset:
+				if(pressed[8]){
+					b.cameras.back().offset.y=stoi(str);
+					str.clear();
+					state=camspeed;
+				}
+				break;
+			case camspeed:
+				if(pressed[8]){
+					b.cameras.back().moveAmount=std::stof(str);
+					str.clear();
+					state=camtrig1;
+				}
+				break;
 			case none:
 				placingObject={{0,0},{0,0},sf::Color::Black};
 				if(pressed[1]){
@@ -468,12 +596,17 @@ int main(int argc, char** argv){
 				}else if(pressed[7]){
 					state=command;
 				}else if(pressed[9]){
-					placingObject.color=sf::Color(200, 200,255);
+					placingObject.color=sf::Color(200, 200, 255);
 					placingObject.size.x=PLAYER_WIDTH;
 					placingObject.size.y=PLAYER_HEIGHT;
 					state=levelSpawn1;
 				}else if(pressed[4]){
 					state=del;
+				}else if(pressed[11]){
+					state=camtrig1;
+					placingObject.size.x=15;
+					placingObject.size.y=5;
+					placingObject.color=sf::Color(210, 190, 100);
 				}
 				break;
 			default:
