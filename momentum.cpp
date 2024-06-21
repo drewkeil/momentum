@@ -88,6 +88,7 @@ private:
 						cLevel.get_drawn(toDraw);
 						player.camera={{0,0,640,360},640,360,0,0,0};
 					}
+					buttons[6]=event.key.code;
 					break;
 				case sf::Event::KeyReleased:
 					if(state==gamestate::playing){
@@ -159,7 +160,7 @@ private:
 	void menu_render(){
 		window.clear(sf::Color::White);
 		std::vector<std::string> contents;
-		menu.get_contents(contents);
+		menu.get_contents(contents, buttons);
 		for(size_t i=0;i<contents.size();++i){
 			text.setString(contents[i]);
 			text.setPosition(50, 20*i+15);

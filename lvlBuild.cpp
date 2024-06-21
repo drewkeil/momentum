@@ -408,7 +408,7 @@ int main(int argc, char** argv){
 							boarder=false;
 						else if(str=="on")
 							boarder=true;
-					}else if(tmp=="scroll"){
+					}else if(tmp=="scroll"){   //  replace this with using arrow keys to move some percent (probably 25%) of the screen width/height in that direction
 						if(str.find(' ')==std::string::npos){
 							state=none;
 							str.clear();
@@ -472,7 +472,7 @@ int main(int argc, char** argv){
 					if(minType==0xFFFFFFFF){
 						if(pressed[0]){
 							b.spawns.erase(b.spawns.begin()+minIdx);
-							b.names.erase(b.spawnNames.begin()+minIdx);
+							b.spawnNames.erase(b.spawnNames.begin()+minIdx);
 						}else
 							placingObject={b.spawns[minIdx], {PLAYER_WIDTH, PLAYER_HEIGHT}, sf::Color(200,200,255)};
 					}else{

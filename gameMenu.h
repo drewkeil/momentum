@@ -17,15 +17,15 @@ public:
 
 	bool update(const uint8_t& input, level& cLevel, playerObject& player, sf::Keyboard::Key keys[]);
 
-	void get_contents(std::vector<std::string>& text);
+	void get_contents(std::vector<std::string>& text, sf::Keyboard::Key keys[]);
 
 private:
-	enum class menustate:uint8_t {main, control, contUp, contDown, contLeft, contRight, contShift, contJump, lvlselect};
+	enum class menustate:uint8_t {main, control, change, lvlselect};
 
 	menustate state=menustate::main;
-	int index=0; //this is signed because i am lazy and want to use std::max for bounds checking
+	int index=0; //this is signed because i am lazy
 	std::string mainmenu[2]={"load level", "controls"};
-	std::string controls[7]={"back", "up:", "down:", "left:", "right:", "shift:", "jump:"};
+	std::string controls[7]={"back", "up: ", "down: ", "left: ", "right: ", "shift: ", "jump: "};
 	std::vector<std::string> options;
 };
 

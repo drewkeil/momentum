@@ -37,7 +37,7 @@ lvlBuild_s.exe: obj/gameObjects.o obj/level.o obj/lvlBuild.o
 	$(CXX) -O2 -static $^ -o lvlBuild_s $(LIBS)
  	
 test: obj/test.o
-	$(CXX) $(C++FLAGS) test.o -o test $(LIBS)
+	$(CXX) $(C++FLAGS) $^ -o test $(LIBS)
 
 clean:
 	rm -rf obj *.exe levels/lvltest

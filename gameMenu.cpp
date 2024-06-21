@@ -12,6 +12,13 @@ gameMenu::gameMenu(){
 }
 
 bool gameMenu::update(const uint8_t& input, level& cLevel, playerObject& player, sf::Keyboard::Key keys[]){
+	if(state==menustate::change){
+		if(keys[6]==sf::Keyboard::Key::Unknown)
+			return false;
+		keys[index-1]=keys[6];
+		state=menustate::control;
+		return false;
+	}
 	if(input&1)
 		index=std::max(index-1,0);
 	else if(input&2)
@@ -57,22 +64,13 @@ bool gameMenu::update(const uint8_t& input, level& cLevel, playerObject& player,
 						index=0;
 						break;
 					case 1:
-						state=menustate::contDown;
-						break;
 					case 2:
-						state=menustate::contLeft;
-						break;
 					case 3:
-						state=menustate::contRight;
-						break;
 					case 4:
-						state=menustate::contShift;
-						break;
 					case 5:
-						state=menustate::contJump;
-						break;
 					case 6:
-						state=menustate::contUp;
+						state=menustate::change;
+						keys[6]=sf::Keyboard::Key::Unknown;
 						break;
 					default:
 						break;
@@ -97,8 +95,14 @@ bool gameMenu::update(const uint8_t& input, level& cLevel, playerObject& player,
 	return false;
 }
 
-void gameMenu::get_contents(std::vector<std::string>& text){
+void gameMenu::get_contents(std::vector<std::string>& text, sf::Keyboard::Key keys[]){
 	options[index].insert(0,"->");
 	text=options;
 	options[index]=options[index].substr(2);
+	if(state==menustate::control||state==menustate::change){
+		for(size_t i=1;i<text.size();++i)
+			text[i]+=sf::Keyboard::getDescription(sf::Keyboard::delocalize(keys[i-1]));
+		if(state==menustate::change)
+			text[index]+=" [press any key to set control]";
+	}
 }
